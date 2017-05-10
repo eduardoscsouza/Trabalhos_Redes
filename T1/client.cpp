@@ -7,6 +7,7 @@
 
 #define SERVER_PORT 54666
 #define SERVER_ADDRESS "127.0.0.1"
+#define SERVER_BUFFER_SIZE 1024
 
 using namespace std;
 
@@ -29,7 +30,13 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 	
-	write(client_socket, "Connection Succesful", sizeof("Connection Succesful"));
+	char message[SERVER_BUFFER_SIZE];
+	bool stop = false;
+	while(!stop){
+		cin>>message;
+		write(client_socket, message, SERVER_BUFFER_SIZE);
+		if(message=="quit") stop=true;
+	}
 
 	close(client_socket);
 

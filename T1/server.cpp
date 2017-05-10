@@ -44,9 +44,14 @@ int main(int argc, char * argv[])
 	}
 
 	char message[SERVER_BUFFER_SIZE];
-	read(peer_socket, message, sizeof("Connection Succesful"));
-
-	cout<<message<<endl;
+	bool stop = false;
+	while(!stop){
+		if (read(peer_socket, message, SERVER_BUFFER_SIZE)==0) usleep(1000);
+		else{
+			if (message=="quit") stop=true;
+			else cout<<message<<endl;
+		}
+	}
 
 	close(server_socket);
 	close(peer_socket);
