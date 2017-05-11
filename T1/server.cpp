@@ -30,31 +30,38 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 
-	if(listen(server_socket, SERVER_BUFFER_SIZE) < 0){
-		cout<<"Error listening to connection"<<endl;
-		return -1;
-	}
-
+	int peers[15];
 	struct sockaddr_in peer_address;
 	socklen_t peer_address_size;
-	int peer_socket = accept(server_socket, (struct sockaddr*) &peer_address, &peer_address_size);
-	if (peer_socket < 0){
-		cout<<"Error accepting connection"<<endl;
-		return -1;
+	for (int i=0; i<15; i++){
+		cout<<"Listening..."<<endl;
+		if(listen(server_socket, SERVER_BUFFER_SIZE) < 0){
+			cout<<"Error listening to connection"<<endl;
+			return -1;
+		}
+
+		peers[i] = accept(server_socket, (struct sockaddr*) &peer_address, &peer_address_size);
+		if (peers[i]< 0){
+			cout<<"Error accepting connection"<<endl;
+			return -1;
+		}
+
+		cout<<"Connected "<<i+1<<endl;
 	}
 
+	/*
 	char message[SERVER_BUFFER_SIZE];
 	bool stop = false;
 	while(!stop){
-		if (read(peer_socket, message, SERVER_BUFFER_SIZE)==0) usleep(1000);
+		if (read(client_socket, message, SERVER_BUFFER_SIZE)==0) usleep(1000);
 		else{
 			if (message=="quit") stop=true;
 			else cout<<message<<endl;
 		}
-	}
+	}*/
 
 	close(server_socket);
-	close(peer_socket);
+	//close(peer_socket);
 
 	return 0;
 }
