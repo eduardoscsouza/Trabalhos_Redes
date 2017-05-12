@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <vector>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -10,7 +11,7 @@
 
 #define SERVER_PORT 54666
 #define SERVER_ADDRESS "127.0.0.1"
-#define SERVER_BUFFER_SIZE 1024
+#define SERVER_CONNECTIONS_SIZE 1024
 
 using namespace std;
 
@@ -27,7 +28,7 @@ public:
 		this->server_address.sin_family = AF_INET;
 		this->server_address.sin_port = 0;
 		this->server_address.sin_addr.s_addr = 0;
-		memset(this->server_address.sin_zero, 0, 8*sizeof(char));
+		memset(this->server_address.sin_zero, 0, sizeof(this->server_address.sin_zero));
 
 		this->client_socket = socket(AF_INET, SOCK_STREAM, 0);
 		if (this->client_socket < 0) cout<<"Error creating socket"<<endl;
@@ -35,10 +36,9 @@ public:
 
 	~ClientSocket()
 	{
-		if (this->client_socket >= 0){
-			close(this->client_socket);
-			this->client_socket = -1;
-		}
+		this->client_socket = -1;
+		this->server_address.sin_port = 0;
+		this->server_address.sin_addr.s_addr = 0;
 	}
 
 	int connect_to_server(const char * ip_address, unsigned short port)
@@ -50,9 +50,10 @@ public:
 		}
 		this->server_address.sin_port = port;
 
-		if (connect(this->client_socket, (const struct sockaddr*)&(this->server_address), sizeof(this->server_address)) < 0){
+		cout<<"Socket: "<<client_socket<<"; Server Addr: "<<this->server_address.sin_addr.s_addr<<"; Port: "<<this->server_address.sin_port<<"; Lenght: "<<sizeof(this->server_address)<<endl;
+		if (connect(this->client_socket, (const struct sockaddr*) &(this->server_address), sizeof(this->server_address)) < 0){
 			cout<<"Error connecting socket"<<endl;
-			//return -1;
+			return -1;
 		}
 
 		return 0;
@@ -71,6 +72,12 @@ public:
 		}
 
 		return 0;
+	}
+
+	void close_socket()
+	{
+		close(this->client_socket);
+		this->client_socket = -1;
 	}
 
 };
@@ -130,13 +137,10 @@ public:
 
 int main(int argc, char * argv[])
 {
-	Sensor * s = new Sensor[15];
-	for (int i=0; i<15; i++) s[i] = Sensor();
-
-	for (int i=0; i<15; i++){
-		s[i].connect_to_server();
-		usleep(1000);
-	}
+	int n = 20;
+	vector<Sensor> sensors = vector<Sensor>(n);
+	for (int i=0; i<n; i++) sensors[i] = Sensor();
+	for (int i=0; i<n; i++) sensors[i].connect_to_server();
 
 	return 0;
 }

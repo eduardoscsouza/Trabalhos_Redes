@@ -1,5 +1,5 @@
 all:
-	g++ client.cpp -o client.out
+	g++ sensor.cpp -o sensor.out
 	g++ server.cpp -o server.out
 
 clean:
