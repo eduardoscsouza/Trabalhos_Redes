@@ -99,8 +99,6 @@ int Client::connect_to_server(const char * ip_addr, unsigned short port)
 	this->socket.initialize();
 	this->server_addr.set(ip_addr, port);
 	
-	cout<<this->socket.socket_fd<<endl;
-	cout<<ip_addr<<endl;
 	if (connect(this->socket.socket_fd, (const struct sockaddr*) &(this->server_addr.address), sizeof(this->server_addr.address)) < 0){
 		cout<<"Error connecting socket to server"<<endl;
 		return -1;
@@ -119,9 +117,14 @@ int Client::send(void * data, size_t nbytes)
 	return 0;
 }
 
-void * Client::receive()
+int Client::receive(void * data, size_t nbytes)
 {
+	if (read(this->socket.socket_fd, data, nbytes) != nbytes){
+		cout<<"Error receiving data"<<endl;
+		return -1;
+	}
 
+	return 0;
 }
 
 void Client::close_client()
@@ -206,6 +209,26 @@ int Server::accept_clients(size_t client_count)
 
 		this->peers.push_back(new_peer);
 	}
+}
+
+int Server::send(size_t peer_id, void * data, size_t nbytes)
+{
+	if (write(this->peers[peer_id].socket.socket_fd, data, nbytes) != nbytes){
+		cout<<"Error sending data"<<endl;
+		return -1;
+	}
+
+	return 0;
+}
+
+int Server::receive(size_t peer_id, void * data, size_t nbytes)
+{
+	if (read(this->peers[peer_id].socket.socket_fd, data, nbytes) != nbytes){
+		cout<<"Error receiving data"<<endl;
+		return -1;
+	}
+
+	return 0;
 }
 
 void Server::close_server()

@@ -42,7 +42,7 @@ public:
 
 	int connect_to_server(const char *, unsigned short);
 	int send(void *, size_t);
-	void * receive();
+	int receive(void *, size_t);
 
 	void close_client();
 	void clear();
@@ -75,6 +75,8 @@ public:
 
 	int bind_to_server(const char *, unsigned short);
 	int accept_clients(size_t);
+	int send(size_t, void *, size_t);
+	int receive(size_t, void *, size_t);
 
 	void close_server();
 	void clear();

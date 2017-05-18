@@ -1,6 +1,6 @@
 all:
-	g++ sensor.cpp -o sensor.out
-	g++ server.cpp -o server.out
+	g++ socketstream.cpp client.cpp -o client.out -std=c++11
+	g++ socketstream.cpp server.cpp -o server.out -std=c++11
 
 clean:
 	rm *.out
