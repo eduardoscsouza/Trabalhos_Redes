@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 #include <string>
+#include <sstream>
 
 #define RAND_PRECISION 1000000
 
@@ -70,18 +71,23 @@ double * generate_data(function<double(double)> func, double t0, double tf, size
 int main(int argc, char * argv[])
 {
 	vector<function<double(double)> > funcs;
-	funcs.push_back(linear(2, 10));
-	funcs.push_back(quadratic(1, -6, 6));
+	funcs.push_back(linear(1, 0));
+	funcs.push_back(linear(2, 0));
+	funcs.push_back(linear(3, 0));
+	/*funcs.push_back(quadratic(1, -6, 6));
 	funcs.push_back(random(0, 10000));
 	funcs.push_back(sine(2, 10, 0));
 	funcs.push_back(cosine(2, 10, 0));
-	funcs.push_back(tangent(2, 10, 0));
+	funcs.push_back(tangent(2, 10, 0));*/
 
+	stringstream filename;
 	double * data;
-	string filename = "";
 	for (int i=0; i<funcs.size(); i++){
 		data = generate_data(funcs[i], 0, 1, 10000);
-		write_data((filename + ((char)('0'+i)) + ".dat").c_str(), data, 10000);
+		filename.str("");
+		filename<<i<<".dat";
+		
+		write_data(filename.str().c_str(), data, 10000);
 		free(data);
 	}
 

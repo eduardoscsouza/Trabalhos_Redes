@@ -1,5 +1,5 @@
-#include <iostream>
-//#include <cstdio>
+#include <unistd.h>
+#include <sstream>
 
 #include "socketstream.hpp"
 
@@ -40,7 +40,7 @@ public:
 		fclose(data_file);
 	}
 
-	void connect_to_server(const char * ip_addr, unsigned short port)
+	void connect_to_virtsens(const char * ip_addr, unsigned short port)
 	{
 		this->client.connect_to_server(ip_addr, port);
 	}
@@ -60,26 +60,28 @@ public:
 
 
 int main(int argc, char * argv[])
-{
-	PhysicalSensor ps;
-	ps.connect_to_server("127.0.0.1", 54666);
-	
-	Client c[10];
-	for (int i=0; i<10; i++) c[i] = Client("127.0.0.1", 54666);
+{	
+	stringstream filename;
+	PhysicalSensor ps[2][3];
+	for (int i=0; i<2; i++){
+		for (int j=0; j<3; j++){
+			filename.str("");
+			filename<<j<<".dat";
 
-	char message[] = "hello from x";
-	for (int i=0; i<10; i++){
-		message[11] = '0' + i;
-		c[i].send(message, sizeof(message));
-		//usleep(1000000);
+			ps[i][j] = PhysicalSensor();
+			ps[i][j].load_data(filename.str().c_str(), 10000);
+			ps[i][j].connect_to_virtsens("127.0.0.1", 54666+i);
+		}
 	}
 
-	char response[] = "          ";
-	for (int i=0; i<10; i++){
-		c[i].receive(response, sizeof("hi x"));
-		cout<<response<<endl;
+	while (1){
+		for (int i=0; i<2; i++)
+			for (int j=0; j<3; j++)
+				ps[i][j].send_sample();
+
+		//usleep(250000);
 	}
 	
-	for (int i=0; i<10; i++) c[i].close_client();
+	for (int i=0; i<2; i++) for (int j=0; j<3; j++) ps[i][j].close_sensor();
 	return 0;
 }
