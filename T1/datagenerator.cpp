@@ -1,13 +1,11 @@
-#include <iostream>
 #include <cstdio>
-#include <cstdlib>
 #include <cmath>
 #include <functional>
 #include <vector>
-#include <string>
 #include <sstream>
 
 #define RAND_PRECISION 1000000
+#define SAMPLE_SIZE 1000000
 
 using namespace std;
 
@@ -55,7 +53,7 @@ void write_data(const char * filename, double * data, size_t data_count)
 
 double * generate_data(function<double(double)> func, double t0, double tf, size_t samples)
 {
-	double * data = (double*) malloc(samples * sizeof(double));
+	double * data = new double[samples];
 
 	double x=t0, step = (tf - t0) / (samples - 1);
 	for (size_t i=0; i<samples; i++){
@@ -83,11 +81,11 @@ int main(int argc, char * argv[])
 	stringstream filename;
 	double * data;
 	for (int i=0; i<funcs.size(); i++){
-		data = generate_data(funcs[i], 0, 1, 10000);
+		data = generate_data(funcs[i], 0, 1, SAMPLE_SIZE);
 		filename.str("");
 		filename<<i<<".dat";
-		
-		write_data(filename.str().c_str(), data, 10000);
+
+		write_data(filename.str().c_str(), data, SAMPLE_SIZE);
 		free(data);
 	}
 

@@ -3,6 +3,11 @@
 
 #include "socketstream.hpp"
 
+#define LOOPBACK_ADDR "127.0.0.1"
+#define BASEPORT 24666
+#define SAMPLE_SIZE 1000000
+#define MICROSEC_IN_DAY 86400000000
+
 using namespace std;
 
 
@@ -69,17 +74,17 @@ int main(int argc, char * argv[])
 			filename<<j<<".dat";
 
 			ps[i][j] = PhysicalSensor();
-			ps[i][j].load_data(filename.str().c_str(), 10000);
-			ps[i][j].connect_to_virtsens("127.0.0.1", 54666+i);
+			ps[i][j].load_data(filename.str().c_str(), SAMPLE_SIZE);
+			ps[i][j].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT + i);
 		}
 	}
 
-	while (1){
+	for (int k=0; k<SAMPLE_SIZE; k++){
 		for (int i=0; i<2; i++)
 			for (int j=0; j<3; j++)
 				ps[i][j].send_sample();
 
-		//usleep(250000);
+		usleep(MICROSEC_IN_DAY/SAMPLE_SIZE);
 	}
 	
 	for (int i=0; i<2; i++) for (int j=0; j<3; j++) ps[i][j].close_sensor();

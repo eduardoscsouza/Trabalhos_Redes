@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <netinet/ip.h>
 
+#define STD_BACKLOG_SIZE 2048
+
 using namespace std;
 
 
@@ -165,7 +167,7 @@ Server::Server()
 {
 	this->socket = Socket();
 	this->addr = InetAddress();
-	this->backlog_size = 1024;
+	this->backlog_size = STD_BACKLOG_SIZE;
 	this->peers = vector<Peer>();
 }
 

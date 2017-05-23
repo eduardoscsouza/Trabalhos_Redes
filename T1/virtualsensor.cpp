@@ -1,10 +1,12 @@
-//#include <iostream>
-//#include <unistd.h>
 #include <functional>
 #include <vector>
 #include <iostream>
 
 #include "socketstream.hpp"
+
+#define LOOPBACK_ADDR "127.0.0.1"
+#define BASEPORT 24666
+#define SAMPLE_SIZE 1000000
 
 using namespace std;
 
@@ -104,16 +106,15 @@ double sum(vector<double> vect)
 int main(int argc, char * argv[])
 {
 	VirtualSensor vs[2];
-	for (int i=0; i<2; i++) vs[i] = VirtualSensor("127.0.0.1", 54666 + i);
+	for (int i=0; i<2; i++) vs[i] = VirtualSensor(LOOPBACK_ADDR, BASEPORT + i);
 	for (int i=0; i<2; i++) vs[i].accept_physen(3);
 
 	vs[0].set_func(&mean);
 	vs[1].set_func(&sum);
-	while(1){
+	for (int k=0; k<SAMPLE_SIZE; k++){
 		for (int i=0; i<2; i++){
 			vs[i].receive_sample();
-			for (int j=0; j<vs[i].physen_data.size(); j++)
-				cout<<vs[i].physen_data[j]<<" ";
+			for (int j=0; j<vs[i].physen_data.size(); j++) cout<<vs[i].physen_data[j]<<" ";
 			cout<<"F(x) = "<<vs[i].calculate()<<endl;
 		}
 	}
