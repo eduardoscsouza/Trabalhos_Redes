@@ -1,12 +1,12 @@
-#include "socketstream.hpp"
-
-#include <iostream>
-
 #include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/ip.h>
+
+#include <iostream>
+
+#include "socketstream.hpp"
 
 #define STD_BACKLOG_SIZE 2048
 
@@ -24,15 +24,15 @@ Socket::~Socket()
 	this->clear();
 }
 
-void Socket::initialize()
+void Socket::initialize(bool verbose)
 {
 	this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (this->socket_fd < 0) cout<<"Error creating socket"<<endl;
+	if (this->socket_fd < 0) if (verbose) cout<<"Error creating socket"<<endl;
 }
 
-void Socket::close_socket()
+void Socket::close_socket(bool verbose)
 {
-	if (this->socket_fd>0 && close(this->socket_fd)<0) cout<<"Error closing socket"<<endl;
+	if (this->socket_fd>0 && close(this->socket_fd)<0) if (verbose) cout<<"Error closing socket"<<endl;
 }
 
 void Socket::clear()
@@ -50,9 +50,9 @@ InetAddress::InetAddress()
 	this->address.sin_addr.s_addr = 0;
 }
 
-InetAddress::InetAddress(const char * ip_addr, unsigned short port) : InetAddress()
+InetAddress::InetAddress(const char * ip_addr, unsigned short port, bool verbose) : InetAddress()
 {
-	this->set(ip_addr, port);
+	this->set(ip_addr, port, verbose);
 }
 
 InetAddress::~InetAddress()
@@ -60,11 +60,11 @@ InetAddress::~InetAddress()
 	this->clear();
 }
 
-int InetAddress::set(const char * ip_addr, unsigned short port)
+int InetAddress::set(const char * ip_addr, unsigned short port, bool verbose)
 {
 	this->address.sin_addr.s_addr = inet_addr(ip_addr);
 	if (this->address.sin_addr.s_addr == 0){
-		cout<<"Invalid address"<<endl;
+		if (verbose) cout<<"Invalid address"<<endl;
 		return -1;
 	}
 	this->address.sin_port = port;
@@ -86,9 +86,9 @@ Client::Client()
 	this->server_addr = InetAddress();
 }
 
-Client::Client(const char * ip_addr, unsigned short port) : Client()
+Client::Client(const char * ip_addr, unsigned short port, bool verbose) : Client()
 {
-	this->connect_to_server(ip_addr, port);
+	this->connect_to_server(ip_addr, port, verbose);
 }
 
 Client::~Client()
@@ -96,42 +96,42 @@ Client::~Client()
 	this->clear();
 }
 
-int Client::connect_to_server(const char * ip_addr, unsigned short port)
+int Client::connect_to_server(const char * ip_addr, unsigned short port, bool verbose)
 {
-	this->socket.initialize();
-	this->server_addr.set(ip_addr, port);
+	this->socket.initialize(verbose);
+	this->server_addr.set(ip_addr, port, verbose);
 	
 	if (connect(this->socket.socket_fd, (const struct sockaddr*) &(this->server_addr.address), sizeof(this->server_addr.address)) < 0){
-		cout<<"Error connecting socket to server"<<endl;
+		if (verbose) cout<<"Error connecting socket to server"<<endl;
 		return -1;
 	}
 
 	return 0;
 }
 
-int Client::send(void * data, size_t nbytes)
+int Client::send(void * data, size_t nbytes, bool verbose)
 {
 	if (write(this->socket.socket_fd, data, nbytes) != nbytes){
-		cout<<"Error sending data"<<endl;
+		if (verbose) cout<<"Error sending data"<<endl;
 		return -1;
 	}
 
 	return 0;
 }
 
-int Client::receive(void * data, size_t nbytes)
+int Client::receive(void * data, size_t nbytes, bool verbose)
 {
 	if (read(this->socket.socket_fd, data, nbytes) != nbytes){
-		cout<<"Error receiving data"<<endl;
+		if (verbose) cout<<"Error receiving data"<<endl;
 		return -1;
 	}
 
 	return 0;
 }
 
-void Client::close_client()
+void Client::close_client(bool verbose)
 {
-	this->socket.close_socket();
+	this->socket.close_socket(verbose);
 }
 
 void Client::clear()
@@ -171,9 +171,9 @@ Server::Server()
 	this->peers = vector<Peer>();
 }
 
-Server::Server(const char * ip_address, unsigned short port)
+Server::Server(const char * ip_address, unsigned short port, bool verbose)
 {
-	this->bind_to_server(ip_address, port);
+	this->bind_to_server(ip_address, port, verbose);
 }
 
 Server::~Server()
@@ -181,23 +181,23 @@ Server::~Server()
 	this->clear();
 }
 
-int Server::bind_to_server(const char * ip_address, unsigned short port)
+int Server::bind_to_server(const char * ip_address, unsigned short port, bool verbose)
 {
-	this->socket.initialize();
-	this->addr.set(ip_address, port);
+	this->socket.initialize(verbose);
+	this->addr.set(ip_address, port, verbose);
 
 	if(bind(this->socket.socket_fd, (const struct sockaddr*) &(this->addr.address), sizeof(this->addr.address)) < 0){
-		cout<<"Error binding socket"<<endl;
+		if (verbose) cout<<"Error binding socket"<<endl;
 		return -1;
 	}
 
 	return 0;
 }
 
-int Server::accept_clients(size_t client_count)
+int Server::accept_clients(size_t client_count, bool verbose)
 {
 	if(listen(this->socket.socket_fd, this->backlog_size) < 0){
-		cout<<"Error listening for connection"<<endl;
+		if (verbose) cout<<"Error listening for connection"<<endl;
 		return -1;
 	}
 
@@ -205,7 +205,7 @@ int Server::accept_clients(size_t client_count)
 		Peer new_peer = Peer();
 		new_peer.socket.socket_fd = accept(this->socket.socket_fd, (struct sockaddr*) &(new_peer.addr.address), &(new_peer.addr_size));
 		if (new_peer.socket.socket_fd < 0){
-			cout<<"Error accepting connection"<<endl;
+			if (verbose) cout<<"Error accepting connection"<<endl;
 			return -1;
 		}
 
@@ -213,29 +213,29 @@ int Server::accept_clients(size_t client_count)
 	}
 }
 
-int Server::send(size_t peer_id, void * data, size_t nbytes)
+int Server::send(size_t peer_id, void * data, size_t nbytes, bool verbose)
 {
 	if (write(this->peers[peer_id].socket.socket_fd, data, nbytes) != nbytes){
-		cout<<"Error sending data"<<endl;
+		if (verbose) cout<<"Error sending data"<<endl;
 		return -1;
 	}
 
 	return 0;
 }
 
-int Server::receive(size_t peer_id, void * data, size_t nbytes)
+int Server::receive(size_t peer_id, void * data, size_t nbytes, bool verbose)
 {
 	if (read(this->peers[peer_id].socket.socket_fd, data, nbytes) != nbytes){
-		cout<<"Error receiving data"<<endl;
+		if (verbose) cout<<"Error receiving data"<<endl;
 		return -1;
 	}
 
 	return 0;
 }
 
-void Server::close_server()
+void Server::close_server(bool verbose)
 {
-	this->socket.close_socket();
+	this->socket.close_socket(verbose);
 }
 
 void Server::clear()
