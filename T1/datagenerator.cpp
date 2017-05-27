@@ -5,7 +5,10 @@
 #include <sstream>
 
 #define RAND_PRECISION 1000000
-#define SAMPLE_SIZE 1000000
+
+#define OBS_PER_SEC 4
+#define SEC_IN_DAY 86400
+#define SAMPLE_SIZE (SEC_IN_DAY * OBS_PER_SEC)
 
 using namespace std;
 
@@ -81,7 +84,7 @@ int main(int argc, char * argv[])
 	stringstream filename;
 	double * data;
 	for (int i=0; i<funcs.size(); i++){
-		data = generate_data(funcs[i], 0, 1, SAMPLE_SIZE);
+		data = generate_data(funcs[i], 0, SEC_IN_DAY, SAMPLE_SIZE);
 		filename.str("");
 		filename<<i<<".dat";
 

@@ -12,8 +12,8 @@ public:
 	Socket();
 	~Socket();
 
-	void initialize(bool=false);
-	void close_socket(bool=false);
+	void initialize(bool=true);
+	void close_socket(bool=true);
 	void clear();
 };
 
@@ -23,10 +23,10 @@ public:
 	struct sockaddr_in address;
 
 	InetAddress();
-	InetAddress(const char *, unsigned short, bool=false);
+	InetAddress(const char *, unsigned short, bool=true);
 	~InetAddress();
 
-	int set(const char *, unsigned short, bool=false);
+	int set(const char *, unsigned short, bool=true);
 	void clear();
 };
 
@@ -37,14 +37,14 @@ public:
 	InetAddress server_addr;
 
 	Client();
-	Client(const char *, unsigned short, bool=false);
+	Client(const char *, unsigned short, bool=true);
 	~Client();
 
-	int connect_to_server(const char *, unsigned short, bool=false);
-	int send(void *, size_t, bool=false);
-	int receive(void *, size_t, bool=false);
+	int connect_to_server(const char *, unsigned short, bool=true);
+	int send(void *, size_t, bool=true);
+	int receive(void *, size_t, bool=true);
 
-	void close_client(bool=false);
+	void close_client(bool=true);
 	void clear();
 };
 
@@ -70,15 +70,15 @@ public:
 	std::vector<Peer> peers;
 
 	Server();
-	Server(const char *, unsigned short, bool=false);
+	Server(const char *, unsigned short, bool=true);
 	~Server();
 
-	int bind_to_server(const char *, unsigned short, bool=false);
-	int accept_clients(size_t, bool=false);
-	int send(size_t, void *, size_t, bool=false);
-	int receive(size_t, void *, size_t, bool=false);
+	int bind_to_server(const char *, unsigned short, bool=true);
+	int accept_clients(size_t, bool=true);
+	int send(size_t, void *, size_t, bool=true);
+	int receive(size_t, void *, size_t, bool=true);
 
-	void close_server(bool=false);
+	void close_server(bool=true);
 	void clear();
 };
 

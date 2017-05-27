@@ -1,12 +1,17 @@
-#include <functional>
-#include <vector>
+#include <unistd.h>
+
 #include <iostream>
+#include <vector>
+#include <functional>
 
 #include "socketstream.hpp"
 
 #define LOOPBACK_ADDR "127.0.0.1"
 #define BASEPORT 24666
-#define SAMPLE_SIZE 1000000
+
+#define OBS_PER_SEC 4
+#define SEC_IN_DAY 86400
+#define SAMPLE_SIZE (SEC_IN_DAY * OBS_PER_SEC)
 
 using namespace std;
 
@@ -70,6 +75,15 @@ public:
 		this->physen_data = vector<double>(physen_count);
 	}
 
+	void call_physen(size_t samples)
+	{
+		bool call = true;
+		for (int i=0; i<this->physen_count; i++){
+			this->server.send(i, &call, sizeof(bool));
+			this->server.send(i, &samples, sizeof(size_t));
+		}
+	}
+
 	void receive_sample()
 	{
 		for (int i=0; i<this->physen_count; i++)
@@ -111,14 +125,28 @@ int main(int argc, char * argv[])
 
 	vs[0].set_func(&mean);
 	vs[1].set_func(&sum);
-	for (int k=0; k<SAMPLE_SIZE; k++){
-		for (int i=0; i<2; i++){
-			vs[i].receive_sample();
-			for (int j=0; j<vs[i].physen_data.size(); j++) cout<<vs[i].physen_data[j]<<" ";
-			cout<<"F(x) = "<<vs[i].calculate()<<endl;
+
+	int op = -1;
+	size_t samples = 0;
+	while (op!=0){
+		cin>>op;
+		if (op!=0){
+			cin>>samples;
+			vs[op-1].call_physen(samples);
+			for (int i=0; i<samples; i++){
+				vs[op-1].receive_sample();
+				for (int j=0; j<vs[op-1].physen_data.size(); j++) cout<<vs[op-1].physen_data[j]<<" ";
+				cout<<endl;
+				usleep(1000000/OBS_PER_SEC);
+			}
+		}
+		else{
+			for (int i=0; i<2; i++){
+				vs[i].call_physen(0);
+				vs[i].close_sensor();
+			}
 		}
 	}
 
-	for (int i=0; i<2; i++) vs[i].close_sensor();
 	return 0;
 }
