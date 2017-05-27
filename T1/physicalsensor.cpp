@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <unistd.h>
-#include <ctime>
 #include <fcntl.h>
+#include <sys/timeb.h>
 
 #include "socketstream.hpp"
 
@@ -26,8 +26,8 @@ class PhysicalSensor
 public:
 	Client client;
 	double * data;
-	size_t data_count, end_sample, cur_pos;
-	time_t dataload_time;
+	size_t data_count, sample_count;
+	struct timeb dataload_time;
 	char state;
 
 
@@ -36,8 +36,11 @@ public:
 	{
 		this->client = Client();
 		this->data = NULL;
-		this->cur_pos = this->end_sample = this->data_count = 0;
-		this->dataload_time = -1;
+		this->sample_count = this->data_count = 0;
+		this->dataload_time.time = 0;
+		this->dataload_time.millitm = 0;
+		this->dataload_time.timezone = 0;
+		this->dataload_time.dstflag = 0;
 		this->state = WAITING;
 	}
 
@@ -45,8 +48,11 @@ public:
 	{
 		this->client.clear();
 		this->data = NULL;
-		this->cur_pos = this->end_sample = this->data_count = 0;
-		this->dataload_time = -1;
+		this->sample_count = this->data_count = 0;
+		this->dataload_time.time = 0;
+		this->dataload_time.millitm = 0;
+		this->dataload_time.timezone = 0;
+		this->dataload_time.dstflag = 0;
 		this->state = WAITING;
 	}
 
@@ -58,7 +64,7 @@ public:
 		this->data = new double[this->data_count=data_count];
 		fread(this->data, this->data_count, sizeof(double), data_file);
 
-		this->dataload_time = time(NULL);
+		ftime(&(this->dataload_time));
 		fclose(data_file);
 	}
 
@@ -69,34 +75,33 @@ public:
 
 	void check_call()
 	{
+		bool activate = false;
 		int cur_flags = fcntl(this->client.socket.socket_fd, F_GETFL);
 		fcntl(this->client.socket.socket_fd, F_SETFL, cur_flags | O_NONBLOCK);
+		if (this->client.receive(&activate, sizeof(bool), false)==-1) activate = false;
+		fcntl(this->client.socket.socket_fd, F_SETFL, cur_flags);
 
-		bool activate = false;
-		if (this->client.receive(&activate, sizeof(bool), false)!=-1 && activate){
+		if (activate){
 			size_t samples;
 			this->client.receive(&samples, sizeof(size_t));
 			if (samples==0) this->state = DEAD;
 			else{
-				this->cur_pos = time(NULL) - this->dataload_time;
-				this->end_sample = this->cur_pos + samples;
+				this->sample_count = samples;
 				this->state = SENDING;
 			}
 		}
 		else this->state = WAITING;
-
-		fcntl(this->client.socket.socket_fd, F_SETFL, cur_flags);
 	}
 
 	void send_sample()
 	{
-		if (this->cur_pos < data_count && this->cur_pos<this->end_sample){
+		struct timeb cur_time;
+		ftime(&cur_time);
+		size_t cur_pos = OBS_PER_SEC*((cur_time.time - dataload_time.time) + ((cur_time.millitm-dataload_time.millitm)/1000.0));
+		if (cur_pos<data_count && this->sample_count>0){
 			this->client.send(data + cur_pos, sizeof(double));
-			this->cur_pos++;
-			if (this->cur_pos == this->end_sample){
-				this->state = WAITING;
-				this->cur_pos = this->end_sample = 0;
-			}
+			this->sample_count--;
+			if (this->sample_count==0) this->state = WAITING;
 		}
 	}
 

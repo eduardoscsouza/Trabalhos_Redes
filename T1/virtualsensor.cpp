@@ -13,6 +13,8 @@
 #define SEC_IN_DAY 86400
 #define SAMPLE_SIZE (SEC_IN_DAY * OBS_PER_SEC)
 
+#define SENSOR_N 2
+
 using namespace std;
 
 
@@ -119,9 +121,11 @@ double sum(vector<double> vect)
 
 int main(int argc, char * argv[])
 {
-	VirtualSensor vs[2];
-	for (int i=0; i<2; i++) vs[i] = VirtualSensor(LOOPBACK_ADDR, BASEPORT + i);
-	for (int i=0; i<2; i++) vs[i].accept_physen(3);
+	vector<VirtualSensor> vs = vector<VirtualSensor>(SENSOR_N);
+	for (int i=0; i<vs.size(); i++) vs[i] = VirtualSensor(LOOPBACK_ADDR, BASEPORT + i);
+	
+	vs[0].accept_physen(3);
+	vs[1].accept_physen(3);
 
 	vs[0].set_func(&mean);
 	vs[1].set_func(&sum);
@@ -140,13 +144,10 @@ int main(int argc, char * argv[])
 				usleep(1000000/OBS_PER_SEC);
 			}
 		}
-		else{
-			for (int i=0; i<2; i++){
-				vs[i].call_physen(0);
-				vs[i].close_sensor();
-			}
-		}
+		else for (int i=0; i<vs.size(); i++) vs[i].call_physen(0);
 	}
 
+	usleep(2000000);
+	for (int i =0; i<vs.size(); i++) vs[i].close_sensor();
 	return 0;
-}
+} 
