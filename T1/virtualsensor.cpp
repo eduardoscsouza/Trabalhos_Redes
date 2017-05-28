@@ -13,7 +13,7 @@
 #define SEC_IN_DAY 86400
 #define SAMPLE_SIZE (SEC_IN_DAY * OBS_PER_SEC)
 
-#define SENSOR_N 2
+#define SENSOR_N 4
 
 using namespace std;
 
@@ -124,11 +124,15 @@ int main(int argc, char * argv[])
 	vector<VirtualSensor> vs = vector<VirtualSensor>(SENSOR_N);
 	for (int i=0; i<vs.size(); i++) vs[i] = VirtualSensor(LOOPBACK_ADDR, BASEPORT + i);
 	
-	vs[0].accept_physen(3);
+	vs[0].accept_physen(16);
 	vs[1].accept_physen(3);
+	vs[2].accept_physen(200);
+	vs[3].accept_physen(3);
 
 	vs[0].set_func(&mean);
 	vs[1].set_func(&sum);
+	vs[2].set_func(&mean);
+	vs[3].set_func(&sum);
 
 	int op = -1;
 	size_t samples = 0;
@@ -139,8 +143,11 @@ int main(int argc, char * argv[])
 			vs[op-1].call_physen(samples);
 			for (int i=0; i<samples; i++){
 				vs[op-1].receive_sample();
-				for (int j=0; j<vs[op-1].physen_data.size(); j++) cout<<vs[op-1].physen_data[j]<<" ";
+				cout<<"Dados: ";
+				for (int j=0; j<vs[op-1].physen_data.size(); j++) printf("%.4lf", vs[op-1].physen_data[j]);
 				cout<<endl;
+
+				cout<<"Resultado: "<<vs[op-1].calculate()<<endl;
 				usleep(1000000/OBS_PER_SEC);
 			}
 		}

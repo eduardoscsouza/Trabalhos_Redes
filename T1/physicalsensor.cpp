@@ -12,7 +12,7 @@
 #define SEC_IN_DAY 86400
 #define SAMPLE_SIZE (SEC_IN_DAY * OBS_PER_SEC)
 
-#define SENSOR_N 6
+#define SENSOR_N 222
 #define WAITING 1
 #define SENDING 2
 #define DEAD 0
@@ -122,13 +122,21 @@ int main(int argc, char * argv[])
 	for (int i=0; i<alive.size(); i++) alive[i] = true;
 	for (int i=0; i<ps.size(); i++) ps[i] = PhysicalSensor();
 	
-	for (int i=0; i<3; i++){
+	for (int i=0; i<16; i++){
 		ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT);
 		ps[i].load_data("0.dat", SAMPLE_SIZE);
 	}
-	for (int i=3; i<SENSOR_N; i++){
+	for (int i=16; i<19; i++){
 		ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT + 1);
 		ps[i].load_data("1.dat", SAMPLE_SIZE);
+	}
+	for (int i=19; i<219; i++){
+		ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT + 2);
+		ps[i].load_data("2.dat", SAMPLE_SIZE);
+	}
+	for (int i=219; i<222; i++){
+		ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT + 3);
+		ps[i].load_data("0.dat", SAMPLE_SIZE);
 	}
 
 	while (alive_count > 0){
