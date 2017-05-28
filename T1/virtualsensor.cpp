@@ -144,7 +144,7 @@ int main(int argc, char * argv[])
 			for (int i=0; i<samples; i++){
 				vs[op-1].receive_sample();
 				cout<<"Dados: ";
-				for (int j=0; j<vs[op-1].physen_data.size(); j++) printf("%.4lf", vs[op-1].physen_data[j]);
+				for (int j=0; j<vs[op-1].physen_data.size(); j++) printf("%.4lf ", vs[op-1].physen_data[j]);
 				cout<<endl;
 
 				cout<<"Resultado: "<<vs[op-1].calculate()<<endl;
@@ -155,6 +155,6 @@ int main(int argc, char * argv[])
 	}
 
 	usleep(2000000);
-	for (int i =0; i<vs.size(); i++) vs[i].close_sensor();
+	for (int i=0; i<vs.size(); i++) vs[i].close_sensor();
 	return 0;
 } 

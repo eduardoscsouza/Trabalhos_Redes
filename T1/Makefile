@@ -6,3 +6,7 @@ all:
 
 clean:
 	rm *.o *.out *.dat
+
+run:
+	sleep 1s && ./physicalsensor.out &
+	./virtualsensor.out
