@@ -17,7 +17,8 @@
 #define SENSOR_N 4
 
 #define PLANE_MAX_WEIGHT 300000
-#define PERSON_WEIGHT 700
+#define PERSON_WEIGHT_MIN 200
+#define PERSON_WEIGHT_MED 700
 
 using namespace std;
 
@@ -119,12 +120,15 @@ vector<double> vect_trans(vector<double> vect)
 	return v;
 }
 
+//recebe a pressao embaixo do assento de todos os passageiros e retorna quantos estão sentados
 vector<double> sum_thresh(vector<double> vect)
 {
+	//variavel para armazenar numero de passageiros
 	double pass = 0;
 
+	//loop que verifica se a pressao eh maior que a de uma crianca, se for, considera que uma pessoa esta sentada
 	for(int i = 0; i < vect.size; i++){
-		if(vect[i] >= PERSON_WEIGHT){
+		if(vect[i] >= PERSON_WEIGHT_MIN){
 			pass++;
 		}
 	}
@@ -134,13 +138,19 @@ vector<double> sum_thresh(vector<double> vect)
 	return v;
 }
 
+//recebe a quantidade de combustivel no tanque (em kg), a quantidade de carga no deck (em kg) e o numero de passageiros que entraram no aviao
 vector<double> sum_perc(vector<double> vect)
 {
+	//variavel que armazena o peso total calculado ate agora
 	double total = 0;
 
-	for(int i = 0; i < vect.size; i++){
+	//soma os valores de peso do combustivel e 
+	for(int i = 0; i < vect.size-1; i++){
 		total += vect[i];
 	}
+
+	//multiplica a quantidade de pessoas pelo peso medio de um adulto e adiciona ao peso total calculado ate agora
+	total += vect[2]*PERSON_WEIGHT_MED;
 
 	vector<double> v = vector<double>(1);
 	v[0] = total/PLANE_MAX_WEIGHT;
