@@ -28,7 +28,7 @@ public:
 	Server server;
 	size_t physen_count;
 	vector<double> physen_data;
-	function<double(vector<double>)> func;
+	function<vector<double>(vector<double>)> func;
 
 
 
@@ -37,7 +37,7 @@ public:
 		this->server = Server();
 		this->physen_count = 0;
 		this->physen_data = vector<double>();
-		this->func = function<double(vector<double>)>();
+		this->func = function<vector<double>(vector<double>)>();
 	}
 
 	VirtualSensor(const char * ip_addr, unsigned short port)
@@ -63,7 +63,7 @@ public:
 		this->func = func;
 	}
 
-	double calculate()
+	vector<double> calculate()
 	{
 		return this->func(this->physen_data);
 	}
@@ -154,11 +154,17 @@ int main(int argc, char * argv[])
 	vs[2].accept_physen(200);
 	vs[3].accept_physen(3);
 
-	vs[0].set_func(&mean);
-	vs[1].set_func(&sum);
-	vs[2].set_func(&mean);
-	vs[3].set_func(&sum);
+	vs[0].set_func(&local);
+	vs[1].set_func(&vect_trans);
+	vs[2].set_func(&sum_thresh);
+	vs[3].set_func(&sum_perc);
 
+	cout<<"USO -> <NUMERO_SENSOR> <NUMERO_AMOSTRAS>"<<endl
+	<<"Sensor 1: Posicao GPS"<<endl
+	<<"Sensor 2: Aceleracao"<<endl
+	<<"Sensor 3: Numero de Passageiros"<<endl
+	<<"Sensor 4: Porcentagem da Carga Máxima"<<endl;
+	
 	int op = -1;
 	size_t samples = 0;
 	while (op!=0){
