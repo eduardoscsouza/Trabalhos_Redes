@@ -159,7 +159,11 @@ vector<double> sum_perc(vector<double> vect)
 
 vector<double> local(vector<double> vect)
 {
-	return 0;
+	vector<double> v = vector<double>(3);
+	for(int i = 0; i < 3; i++){
+		v[i] = vect[i];
+	}
+	return v;
 }
 
 
