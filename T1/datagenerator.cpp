@@ -2,7 +2,6 @@
 #include <cmath>
 #include <functional>
 #include <vector>
-#include <sstream>
 
 #define RAND_PRECISION 1000000
 
@@ -120,6 +119,22 @@ int main(int argc, char * argv[])
 	funcs.push_back(constant(98653.845));
 	names.push_back("z4");
 	
+	funcs.push_back(sine(0.0000000003, 412321321.321, 0));
+	names.push_back("d1");
+	funcs.push_back(sine(0.0000000012, 2123321.311, 0));
+	names.push_back("d2");
+	funcs.push_back(sine(0.0000000043, 512376521.421, 0));
+	names.push_back("d3");
+	funcs.push_back(sine(0.0000000103, 5421321321.321, 0));
+	names.push_back("d4");
+
+	funcs.push_back(sine(0.00763, 11.820, 0));
+	names.push_back("ax");
+	funcs.push_back(sine(0.103, 2.32, 0));
+	names.push_back("ay");
+	funcs.push_back(constant(9.8));
+	names.push_back("az");
+
 	vector<function<double(double)> > com_funcs;
 	com_funcs.push_back(constant(10));
 	com_funcs.push_back(constant(10));
@@ -128,7 +143,7 @@ int main(int argc, char * argv[])
 	stringstream filename;
 	double * data;
 	for (int i=0; i<5; i++){
-		data = generate_data(funcs[0], 0, SEC_IN_DAY, SAMPLE_SIZE);
+		data = generate_data(funcs[i], 0, SEC_IN_DAY, SAMPLE_SIZE);
 		filename.str("");
 		filename<<i<<".dat";
 
