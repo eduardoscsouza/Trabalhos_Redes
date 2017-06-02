@@ -1,0 +1,25 @@
+---SISTEMA DE SENSORES DE AERONAVE---
+
+	Eduardo Santos Carlos de Souza 9293481
+	Fabricio Guedes Faria 9293522
+
+---COMPILACAO---
+
+Automatico:
+	make
+
+Manual:
+	g++ socketstream.cpp -o socketstream.o -c -std=c++11
+	g++ socketstream.o physicalsensor.cpp -o physicalsensor.out -std=c++11
+	g++ socketstream.o virtualsensor.cpp -o virtualsensor.out -std=c++11
+	g++ datagenerator.cpp -o datagenerator.out -lm -std=c++11
+
+---EXECUCAO---
+
+Automatico:
+	make run
+
+Manual:
+	./datagenerator.out
+    terminal 1 - ./physicalsensor.out
+    terminal 2 - ./virtualsensor.out

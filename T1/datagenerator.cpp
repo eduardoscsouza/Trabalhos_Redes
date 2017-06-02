@@ -89,7 +89,7 @@ double * generate_data(function<double(double)> func, double t0, double tf, size
 int main(int argc, char * argv[])
 {
 	/*
-	Funcoes que serão utilizadas paras os dados dos sensores físicos
+	Funcoes que serão utilizadas para os dados dos sensores físicos
 	Sao definidas semi-aleatoriamente
 	*/
 	vector<function<double(double)> > funcs;
