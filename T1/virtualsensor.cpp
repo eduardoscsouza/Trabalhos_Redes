@@ -103,11 +103,20 @@ public:
 };
 
 
-
+//recebe a aceleracao da aeronave nos tres eixos e retorna a aceleracao resultante
 vector<double> vect_trans(vector<double> vect)
 {
+	//cria o vetor que recebera as coordenadas polares do vetor aceleracao resultante
+	vector<double> v = vector<double>(3);
 
-	return 0;
+	//calculo da coordenada polar R = sqrt(x^2 + y^2 + z^2)
+	v[0] = sqrt(vect[0]*vect[0] + vect[1]*vect[1] + vect[2]*vect[2]);
+	//calculo da coordenada polar theta = arctg(y/x)
+	v[1] = atan2(vect[1], vect[0]);
+	//calculo da coordenada polar fi = arccos(z/R)
+	v[2] = acos(vect[2]/v[0]);
+
+	return v;
 }
 
 vector<double> sum_thresh(vector<double> vect)
