@@ -92,19 +92,33 @@ int main(int argc, char * argv[])
 	Funcoes que serão utilizadas paras os dados dos sensores físicos
 	Sao definidas semi-aleatoriamente
 	*/
-	
-	write_data("x1", generate_data(), SAMPLE_SIZE);
-	write_data("y1", data, SAMPLE_SIZE);
-	write_data("z1", data, SAMPLE_SIZE);
-	write_data("d1", data, SAMPLE_SIZE);
-	write_data("", data, SAMPLE_SIZE);
-	write_data("", data, SAMPLE_SIZE);
-	write_data("", data, SAMPLE_SIZE);
 	vector<function<double(double)> > funcs;
 	vector<string> names;
 
 	funcs.push_back(constant(2313.213));
+	names.push_back("x1");
 	funcs.push_back(constant(63576.324));
+	names.push_back("y1");
+	funcs.push_back(constant(37141.123));
+	names.push_back("z1");
+	funcs.push_back(constant(1435.341));
+	names.push_back("x2");
+	funcs.push_back(constant(18347.145));
+	names.push_back("y2");
+	funcs.push_back(constant(934.644));
+	names.push_back("z2");
+	funcs.push_back(constant(84.500));
+	names.push_back("x3");
+	funcs.push_back(constant(239485.64));
+	names.push_back("y3");
+	funcs.push_back(constant(9845.245));
+	names.push_back("z3");
+	funcs.push_back(constant(84245.234));
+	names.push_back("x4");
+	funcs.push_back(constant(0395.235));
+	names.push_back("y4");
+	funcs.push_back(constant(98653.845));
+	names.push_back("z4");
 	
 	vector<function<double(double)> > com_funcs;
 	com_funcs.push_back(constant(10));
