@@ -1,7 +1,10 @@
-#include <cstdio>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/timeb.h>
+
+#include <sstream>
+#include <string>
+#include <iostream>
 
 #include "socketstream.hpp"
 
@@ -116,27 +119,36 @@ public:
 
 int main(int argc, char * argv[])
 {
+	if (argc!=1 && argc!=3){
+		cout<<"---USO---"<<endl<<"/virtualsensor.out"<<"OU"<<endl<<"/virtualsensor.out <ip> <porta>"<<endl;
+		return 0;
+	}
+	string add = string((argc==3) ? argv[1] : LOOPBACK_ADDR);
+	short port = (argc==3) ? atoi(argv[2]) : BASEPORT;
+
 	vector<PhysicalSensor> ps = vector<PhysicalSensor>(SENSOR_N);
 	vector<bool> alive = vector<bool>(SENSOR_N);
 	int alive_count = SENSOR_N;
 	for (int i=0; i<alive.size(); i++) alive[i] = true;
 	for (int i=0; i<ps.size(); i++) ps[i] = PhysicalSensor();
 	
-	for (int i=0; i<16; i++){
-		ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT);
-		ps[i].load_data("0.dat", SAMPLE_SIZE);
-	}
-	for (int i=16; i<19; i++){
-		ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT + 1);
-		ps[i].load_data("1.dat", SAMPLE_SIZE);
-	}
-	for (int i=19; i<219; i++){
-		ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT + 2);
-		ps[i].load_data("2.dat", SAMPLE_SIZE);
-	}
-	for (int i=219; i<222; i++){
-		ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT + 3);
-		ps[i].load_data("0.dat", SAMPLE_SIZE);
+	stringstream filename;
+	for (int i=0; i<SENSOR_N; i++){
+		filename.str("");
+		if (i<16) filename<<((i%4==3) ? ('d') : (char)('x'+(i%4)))<<(i/4)+1;
+		else if (i<19) filename<<"a"<<(char)('x'+(i-16));
+		else if (i<169) filename<<"pvar";
+		else if (i<219) filename<<"psin";
+		else if (i==219) filename<<"fuel";
+		else if (i==220) filename<<"pass";
+		else filename<<"bagg";
+		filename<<".dat";
+
+		ps[i].load_data(filename.str().c_str(), SAMPLE_SIZE);
+		if (i<16) ps[i].connect_to_virtsens(add.c_str(), port);
+		else if (i<19) ps[i].connect_to_virtsens(add.c_str(), port+1);
+		else if (i<219) ps[i].connect_to_virtsens(add.c_str(), port+2);
+		else ps[i].connect_to_virtsens(add.c_str(), port+3);
 	}
 
 	while (alive_count > 0){

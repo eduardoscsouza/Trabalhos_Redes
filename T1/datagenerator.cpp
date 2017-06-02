@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <cmath>
 #include <functional>
 #include <vector>
@@ -72,7 +73,7 @@ void write_data(const char * filename, double * data, size_t data_count)
 
 double * generate_data(function<double(double)> func, double t0, double tf, size_t samples)
 {
-	double * data = new double[samples];
+	double * data = (double*) malloc(sizeof(double)*samples);
 
 	double x=t0, step = (tf - t0) / (samples - 1);
 	for (size_t i=0; i<samples; i++){
@@ -93,32 +94,34 @@ int main(int argc, char * argv[])
 	*/
 	vector<function<double(double)> > funcs;
 	vector<string> names;
+/*
+	stringstream filename;
+	for (int i=0; i<)*/
 
-	funcs.push_back(constant(2313.213));
+	funcs.push_back(constant(237688713.213));
 	names.push_back("x1");
-	funcs.push_back(constant(63576.324));
+	funcs.push_back(constant(6356576.324));
 	names.push_back("y1");
-	funcs.push_back(constant(37141.123));
+	funcs.push_back(constant(37132141.123));
 	names.push_back("z1");
-	funcs.push_back(constant(1435.341));
+	funcs.push_back(constant(14365465.341));
 	names.push_back("x2");
-	funcs.push_back(constant(18347.145));
+	funcs.push_back(constant(18367847.145));
 	names.push_back("y2");
-	funcs.push_back(constant(934.644));
+	funcs.push_back(constant(9344214.644));
 	names.push_back("z2");
-	funcs.push_back(constant(84.500));
+	funcs.push_back(constant(84321312.500));
 	names.push_back("x3");
-	funcs.push_back(constant(239485.64));
+	funcs.push_back(constant(233219485.64));
 	names.push_back("y3");
-	funcs.push_back(constant(9845.245));
+	funcs.push_back(constant(9865445.245));
 	names.push_back("z3");
-	funcs.push_back(constant(84245.234));
+	funcs.push_back(constant(84432645245.234));
 	names.push_back("x4");
-	funcs.push_back(constant(0395.235));
+	funcs.push_back(constant(06456395.235));
 	names.push_back("y4");
-	funcs.push_back(constant(98653.845));
+	funcs.push_back(constant(9854335653.845));
 	names.push_back("z4");
-	
 	funcs.push_back(sine(0.0000000003, 412321321.321, 0));
 	names.push_back("d1");
 	funcs.push_back(sine(0.0000000012, 2123321.311, 0));
@@ -136,19 +139,29 @@ int main(int argc, char * argv[])
 	names.push_back("az");
 
 	vector<function<double(double)> > com_funcs;
-	com_funcs.push_back(constant(10));
-	com_funcs.push_back(constant(10));
+	com_funcs.push_back(constant(200));
+	com_funcs.push_back(sine(3212645.65, 0.5, 0));
 	funcs.push_back(comp_func(com_funcs));
+	names.push_back("pvar");
+	com_funcs.clear();
+	com_funcs.push_back(constant(700));
+	com_funcs.push_back(sine(0.0000005, 700, 0));
+	funcs.push_back(comp_func(com_funcs));
+	names.push_back("psin");
 
-	stringstream filename;
+	funcs.push_back(linear(-0.02, 20000));
+	names.push_back("fuel");
+	funcs.push_back(constant(180));
+	names.push_back("pass");
+	funcs.push_back(constant(100000));
+	names.push_back("bagg");
+
 	double * data;
-	for (int i=0; i<5; i++){
+	for (int i=0; i<funcs.size(); i++){
 		data = generate_data(funcs[i], 0, SEC_IN_DAY, SAMPLE_SIZE);
-		filename.str("");
-		filename<<i<<".dat";
 
-		write_data(filename.str().c_str(), data, SAMPLE_SIZE);
-		free(data);
+		write_data((names[i] + ".dat").c_str(), data, SAMPLE_SIZE);
+		free (data);
 	}
 
 	return 0;

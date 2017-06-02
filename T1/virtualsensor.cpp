@@ -1,9 +1,11 @@
 #include <unistd.h>
+#include <cmath>
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <functional>
-#include <cmath>
+#include <string>
 
 #include "socketstream.hpp"
 
@@ -164,8 +166,15 @@ vector<double> local(vector<double> vect)
 
 int main(int argc, char * argv[])
 {
-	vector<VirtualSensor> vs = vector<VirtualSensor>(SENSOR_N);
-	for (int i=0; i<vs.size(); i++) vs[i] = VirtualSensor(LOOPBACK_ADDR, BASEPORT + i);
+	if (argc!=1 && argc!=3){
+		cout<<"---USO---"<<endl<<"/virtualsensor.out"<<"OU"<<endl<<"/virtualsensor.out <ip> <porta>"<<endl;
+		return 0;
+	}
+	string add = string((argc==3) ? argv[1] : LOOPBACK_ADDR);
+	short port = (argc==3) ? atoi(argv[2]) : BASEPORT;
+
+	VirtualSensor * vs = new VirtualSensor[SENSOR_N];
+	for (int i=0; i<SENSOR_N; i++) vs[i] = VirtualSensor(add.c_str(), port+i);
 	
 	vs[0].accept_physen(16);
 	vs[1].accept_physen(3);
@@ -178,20 +187,22 @@ int main(int argc, char * argv[])
 	vs[3].set_func(&sum_perc);
 
 	bool verbose;
-	cout<<"Deseja ver os dados que os sensores virtuais recebem, ou apenas o resultado?"<<endl<<"(1/0)"<<endl;
+	cout<<endl<<"Deseja ver os dados que os sensores virtuais recebem, ou apenas o resultado?"<<endl<<"(1/0)"<<endl;
 	cin>>verbose;
 
-	cout<<"USO -> <NUMERO_SENSOR> <NUMERO_AMOSTRAS>"<<endl
+	cout<<endl<<"---USO---"<<endl<<"<NUMERO_DO_SENSOR> <NUMERO_DE_LEITURAS>"<<endl
+	<<"<NUMERO_DO_SENSOR>==0 -> Fechar o Programa"<<endl<<endl
 	<<"Sensor 1: Posicao GPS"<<endl
 	<<"Sensor 2: Aceleracao"<<endl
-	<<"Sensor 3: Numero de Passageiros"<<endl
+	<<"Sensor 3: Numero de Passageiros Sentados"<<endl
 	<<"Sensor 4: Porcentagem da Carga Máxima"<<endl;
 	
+	cout<<setprecision(4);
 	int op = -1;
 	size_t samples = 0;
 	while (op!=0){
 		cin>>op;
-		if (op!=0){
+		if (op>0 && op<SENSOR_N){
 			cin>>samples;
 			vs[op-1].call_physen(samples);
 			for (int i=0; i<samples; i++){
@@ -203,14 +214,20 @@ int main(int argc, char * argv[])
 				}
 
 				vector<double> result = vs[op-1].calculate();
+				cout<<"Resultado: ";
 				for(int j=0; j<result.size(); j++) printf("%.4lf ", result[j]);
+				cout<<endl;
 				usleep(1000000/OBS_PER_SEC);
 			}
 		}
-		else for (int i=0; i<vs.size(); i++) vs[i].call_physen(0);
+		else{
+			if (op==0) for (int i=0; i<SENSOR_N; i++) vs[i].call_physen(0);
+			else cout<<"Invalido"<<endl;
+		}
 	}
 
 	usleep(2000000);
-	for (int i=0; i<vs.size(); i++) vs[i].close_sensor();
+	for (int i=0; i<SENSOR_N; i++) vs[i].close_sensor();
+	delete[] vs;
 	return 0;
 } 
