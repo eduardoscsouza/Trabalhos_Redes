@@ -89,8 +89,9 @@ double * generate_data(function<double(double)> func, double t0, double tf, size
 int main(int argc, char * argv[])
 {
 	/*
-	Funcoes que serão utilizadas nos sensores físicos
+	Funcoes que serão utilizadas paras os dados dos sensores físicos
 	Sao definidas semi-aleatoriamente
+	*/
 	
 	write_data("x1", generate_data(), SAMPLE_SIZE);
 	write_data("y1", data, SAMPLE_SIZE);
@@ -98,9 +99,13 @@ int main(int argc, char * argv[])
 	write_data("d1", data, SAMPLE_SIZE);
 	write_data("", data, SAMPLE_SIZE);
 	write_data("", data, SAMPLE_SIZE);
-	write_data("", data, SAMPLE_SIZE);*/
+	write_data("", data, SAMPLE_SIZE);
 	vector<function<double(double)> > funcs;
 	vector<string> names;
+
+	funcs.push_back(constant(2313.213));
+	funcs.push_back(constant(63576.324));
+	
 	vector<function<double(double)> > com_funcs;
 	com_funcs.push_back(constant(10));
 	com_funcs.push_back(constant(10));
