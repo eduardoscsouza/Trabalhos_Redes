@@ -15,6 +15,9 @@
 
 #define SENSOR_N 4
 
+#define PLANE_MAX_WEIGHT 300000
+#define PERSON_WEIGHT 700
+
 using namespace std;
 
 
@@ -100,23 +103,41 @@ public:
 
 
 
-double vect_trans(vector<double> vect)
+vector<double> vect_trans(vector<double> vect)
 {
 
 	return 0;
 }
 
-double sum_thresh(vector<double> vect)
+vector<double> sum_thresh(vector<double> vect)
 {
-	return 0;
+	double pass = 0;
+
+	for(int i = 0; i < vect.size; i++){
+		if(vect[i] >= PERSON_WEIGHT){
+			pass++;
+		}
+	}
+	
+	vector<double> v = vector<double>(1);
+	v[0] = pass;
+	return v;
 }
 
-double sum_perc(vector<double> vect)
+vector<double> sum_perc(vector<double> vect)
 {
-	return 0;
+	double total = 0;
+
+	for(int i = 0; i < vect.size; i++){
+		total += vect[i];
+	}
+
+	vector<double> v = vector<double>(1);
+	v[0] = total/PLANE_MAX_WEIGHT;
+	return v;
 }
 
-double local(vector<double> vect)
+vector<double> local(vector<double> vect)
 {
 	return 0;
 }
