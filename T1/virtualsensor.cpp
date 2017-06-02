@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <cmath>
 
 #include "socketstream.hpp"
 
@@ -45,7 +46,7 @@ public:
 		this->server = Server(ip_addr, port);
 		this->physen_count = 0;
 		this->physen_data = vector<double>();
-		this->func = function<double(vector<double>)>();
+		this->func = function<vector<double>(vector<double>)>();
 	}
 
 	~VirtualSensor()
@@ -53,7 +54,7 @@ public:
 		this->server.clear();
 		this->physen_count = 0;
 		this->physen_data = vector<double>();
-		this->func = function<double(vector<double>)>();
+		this->func = function<vector<double>(vector<double>)>();
 	}
 
 
@@ -159,6 +160,10 @@ int main(int argc, char * argv[])
 	vs[2].set_func(&sum_thresh);
 	vs[3].set_func(&sum_perc);
 
+	bool verbose;
+	cout<<"Deseja ver os dados que os sensores virtuais recebem, ou apenas o resultado?(1/0)"<<endl
+	cin>>verbose;
+
 	cout<<"USO -> <NUMERO_SENSOR> <NUMERO_AMOSTRAS>"<<endl
 	<<"Sensor 1: Posicao GPS"<<endl
 	<<"Sensor 2: Aceleracao"<<endl
@@ -174,11 +179,14 @@ int main(int argc, char * argv[])
 			vs[op-1].call_physen(samples);
 			for (int i=0; i<samples; i++){
 				vs[op-1].receive_sample();
-				cout<<"Dados: ";
-				for (int j=0; j<vs[op-1].physen_data.size(); j++) printf("%.4lf ", vs[op-1].physen_data[j]);
-				cout<<endl;
+				if (verbose){
+					cout<<"Dados: ";
+					for (int j=0; j<vs[op-1].physen_data.size(); j++) printf("%.4lf ", vs[op-1].physen_data[j]);
+					cout<<endl;
+				}
 
-				cout<<"Resultado: "<<vs[op-1].calculate()<<endl;
+				vector<double> result = vs[op-1].calculate();
+				for(int j=0; j<result.size(); j++) printf("%.4lf ", result[j]);
 				usleep(1000000/OBS_PER_SEC);
 			}
 		}
