@@ -100,21 +100,25 @@ public:
 
 
 
-double mean(vector<double> vect)
+double vect_trans(vector<double> vect)
 {
-	size_t size = vect.size();
-	double m = 0;
-	for (int i=0; i<size; i++) m+=vect[i]/size;
 
-	return m;
+	return 0;
 }
 
-double sum(vector<double> vect)
+double sum_thresh(vector<double> vect)
 {
-	double s = 0;
-	for (int i=0; i<vect.size(); i++) s+=vect[i];
+	return 0;
+}
 
-	return s;
+double sum_perc(vector<double> vect)
+{
+	return 0;
+}
+
+double local(vector<double> vect)
+{
+	return 0;
 }
 
 

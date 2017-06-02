@@ -8,5 +8,6 @@ clean:
 	rm *.o *.out *.dat
 
 run:
+	./datagenerator.out
 	sleep 1s && ./physicalsensor.out &
 	./virtualsensor.out
