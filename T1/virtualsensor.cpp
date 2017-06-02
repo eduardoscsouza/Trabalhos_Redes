@@ -59,7 +59,7 @@ public:
 
 
 
-	void set_func(function<double(vector<double>)> func)
+	void set_func(function<vector<double>(vector<double>)> func)
 	{
 		this->func = func;
 	}
@@ -123,7 +123,7 @@ vector<double> sum_thresh(vector<double> vect)
 {
 	double pass = 0;
 
-	for(int i = 0; i < vect.size; i++){
+	for(int i = 0; i < vect.size(); i++){
 		if(vect[i] >= PERSON_WEIGHT){
 			pass++;
 		}
@@ -138,7 +138,7 @@ vector<double> sum_perc(vector<double> vect)
 {
 	double total = 0;
 
-	for(int i = 0; i < vect.size; i++){
+	for(int i = 0; i < vect.size(); i++){
 		total += vect[i];
 	}
 
@@ -149,7 +149,7 @@ vector<double> sum_perc(vector<double> vect)
 
 vector<double> local(vector<double> vect)
 {
-	return 0;
+	return vector<double>();
 }
 
 
@@ -170,7 +170,7 @@ int main(int argc, char * argv[])
 	vs[3].set_func(&sum_perc);
 
 	bool verbose;
-	cout<<"Deseja ver os dados que os sensores virtuais recebem, ou apenas o resultado?(1/0)"<<endl
+	cout<<"Deseja ver os dados que os sensores virtuais recebem, ou apenas o resultado?"<<endl<<"(1/0)"<<endl;
 	cin>>verbose;
 
 	cout<<"USO -> <NUMERO_SENSOR> <NUMERO_AMOSTRAS>"<<endl

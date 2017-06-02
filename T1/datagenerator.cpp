@@ -45,6 +45,23 @@ function<double(double)> tangent(double freq, double ampl, double ang)
 	return ([=](double x) -> double { return ampl*tan(freq*x + ang); });
 }
 
+function<double(double)> constant(double cons)
+{
+	return ([=](double x) -> double { return cons; });
+}
+
+function<double(double)> comp_func(vector<function<double(double)> > funcs)
+{
+	return
+	([=](double x) -> double
+	{
+		double out = 0;
+		for (int i=0; i<funcs.size(); i++) out+=funcs[i](x);
+
+		return out; 
+	});
+}
+
 
 
 void write_data(const char * filename, double * data, size_t data_count)
@@ -71,20 +88,28 @@ double * generate_data(function<double(double)> func, double t0, double tf, size
 
 int main(int argc, char * argv[])
 {
+	/*
+	Funcoes que serão utilizadas nos sensores físicos
+	Sao definidas semi-aleatoriamente
+	
+	write_data("x1", generate_data(), SAMPLE_SIZE);
+	write_data("y1", data, SAMPLE_SIZE);
+	write_data("z1", data, SAMPLE_SIZE);
+	write_data("d1", data, SAMPLE_SIZE);
+	write_data("", data, SAMPLE_SIZE);
+	write_data("", data, SAMPLE_SIZE);
+	write_data("", data, SAMPLE_SIZE);*/
 	vector<function<double(double)> > funcs;
-	funcs.push_back(linear(1, 0));
-	funcs.push_back(linear(2, 0));
-	funcs.push_back(linear(3, 0));
-	/*funcs.push_back(quadratic(1, -6, 6));
-	funcs.push_back(random(0, 10000));
-	funcs.push_back(sine(2, 10, 0));
-	funcs.push_back(cosine(2, 10, 0));
-	funcs.push_back(tangent(2, 10, 0));*/
+	vector<string> names;
+	vector<function<double(double)> > com_funcs;
+	com_funcs.push_back(constant(10));
+	com_funcs.push_back(constant(10));
+	funcs.push_back(comp_func(com_funcs));
 
 	stringstream filename;
 	double * data;
-	for (int i=0; i<funcs.size(); i++){
-		data = generate_data(funcs[i], 0, SEC_IN_DAY, SAMPLE_SIZE);
+	for (int i=0; i<5; i++){
+		data = generate_data(funcs[0], 0, SEC_IN_DAY, SAMPLE_SIZE);
 		filename.str("");
 		filename<<i<<".dat";
 
