@@ -127,7 +127,7 @@ vector<double> sum_thresh(vector<double> vect)
 	double pass = 0;
 
 	for(int i = 0; i < vect.size(); i++){
-		if(vect[i] >= PERSON_WEIGHT){
+		if(vect[i] >= PERSON_WEIGHT_MIN){
 			pass++;
 		}
 	}
@@ -143,10 +143,8 @@ vector<double> sum_perc(vector<double> vect)
 	//variavel que armazena o peso total calculado ate agora
 	double total = 0;
 
-	for(int i = 0; i < vect.size(); i++){
-
 	//multiplica a quantidade de pessoas pelo peso medio de um adulto e adiciona ao peso total calculado ate agora
-	total += vect[2]*PERSON_WEIGHT_MED;
+	for(int i = 0; i < vect.size(); i++) total += vect[2]*PERSON_WEIGHT_MED;
 
 	vector<double> v = vector<double>(1);
 	v[0] = total/PLANE_MAX_WEIGHT;
