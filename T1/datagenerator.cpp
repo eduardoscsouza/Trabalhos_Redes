@@ -3,8 +3,11 @@
 #include <cmath>
 #include <functional>
 #include <vector>
+#include <string>
+#include <sstream>
 
-#define RAND_PRECISION 1000000
+#define RAND_PRECISION 1000000.0
+#define RAND_RANGE(MIN, MAX) ((MIN) + (((MAX)-(MIN))*((rand() % (int)RAND_PRECISION)/(RAND_PRECISION-1.0))))
 
 #define OBS_PER_SEC 4
 #define SEC_IN_DAY 86400
@@ -19,30 +22,9 @@ function<double(double)> linear(double a, double b)
 	return ([=](double x) -> double { return a*x + b; });
 }
 
-function<double(double)> quadratic(double a, double b, double c) 
-{
-	return ([=](double x) -> double { return a*x*x + b*x + c; });
-}
-
-function<double(double)> random(double min, double max) 
-{
-	long long int_min = (long long)(min * RAND_PRECISION), int_max = (long long)(max * RAND_PRECISION);
-	return ([=](double x) -> double { return ((rand() % (int_max-int_min)) + int_min) / ((double)RAND_PRECISION); });
-}
-
 function<double(double)> sine(double freq, double ampl, double ang)
 {
 	return ([=](double x) -> double { return ampl*sin(freq*x + ang); });
-}
-
-function<double(double)> cosine(double freq, double ampl, double ang)
-{
-	return ([=](double x) -> double { return ampl*cos(freq*x + ang); });
-}
-
-function<double(double)> tangent(double freq, double ampl, double ang)
-{
-	return ([=](double x) -> double { return ampl*tan(freq*x + ang); });
 }
 
 function<double(double)> constant(double cons)
@@ -66,14 +48,14 @@ function<double(double)> comp_func(vector<function<double(double)> > funcs)
 
 void write_data(const char * filename, double * data, size_t data_count)
 {
-	FILE * data_file = fopen(filename, "w+");
+	FILE * data_file = fopen(filename, "w");
 	fwrite(data, data_count, sizeof(double), data_file);
 	fclose(data_file);
 }
 
 double * generate_data(function<double(double)> func, double t0, double tf, size_t samples)
 {
-	double * data = (double*) malloc(sizeof(double)*samples);
+	double * data = new double[samples];
 
 	double x=t0, step = (tf - t0) / (samples - 1);
 	for (size_t i=0; i<samples; i++){
@@ -86,75 +68,69 @@ double * generate_data(function<double(double)> func, double t0, double tf, size
 
 
 
+
+
+
 int main(int argc, char * argv[])
 {
 	/*
 	Funcoes que serão utilizadas para os dados dos sensores físicos
-	Sao definidas semi-aleatoriamente
+	Sao definidas previamente e semi-aleatoriamente
 	*/
 	vector<function<double(double)> > funcs;
 	vector<string> names;
-/*
+
 	stringstream filename;
-	for (int i=0; i<)*/
+	for (int i=0; i<16; i++){
+		filename.str("");
+		filename<<((i%4==3) ? ('d') : (char)('x'+(i%4)))<<(i/4)+1;
+		names.push_back(filename.str());
 
-	funcs.push_back(constant(237688713.213));
-	names.push_back("x1");
-	funcs.push_back(constant(6356576.324));
-	names.push_back("y1");
-	funcs.push_back(constant(37132141.123));
-	names.push_back("z1");
-	funcs.push_back(constant(14365465.341));
-	names.push_back("x2");
-	funcs.push_back(constant(18367847.145));
-	names.push_back("y2");
-	funcs.push_back(constant(9344214.644));
-	names.push_back("z2");
-	funcs.push_back(constant(84321312.500));
-	names.push_back("x3");
-	funcs.push_back(constant(233219485.64));
-	names.push_back("y3");
-	funcs.push_back(constant(9865445.245));
-	names.push_back("z3");
-	funcs.push_back(constant(84432645245.234));
-	names.push_back("x4");
-	funcs.push_back(constant(06456395.235));
-	names.push_back("y4");
-	funcs.push_back(constant(9854335653.845));
-	names.push_back("z4");
-	funcs.push_back(sine(0.0000000003, 412321321.321, 0));
-	names.push_back("d1");
-	funcs.push_back(sine(0.0000000012, 2123321.311, 0));
-	names.push_back("d2");
-	funcs.push_back(sine(0.0000000043, 512376521.421, 0));
-	names.push_back("d3");
-	funcs.push_back(sine(0.0000000103, 5421321321.321, 0));
-	names.push_back("d4");
+		if (i%4==3) funcs.push_back(sine(RAND_RANGE(0.000001, 0.000050), RAND_RANGE(500000, 1000000), 0));
+		else funcs.push_back(constant(RAND_RANGE(6380000, 6400000)));
+	}
 
-	funcs.push_back(sine(0.00763, 11.820, 0));
-	names.push_back("ax");
-	funcs.push_back(sine(0.103, 2.32, 0));
-	names.push_back("ay");
-	funcs.push_back(constant(9.8));
+	for (int i=0; i<2; i++){
+		filename.str("");
+		filename<<"a"<<((char)('x'+i));
+		names.push_back(filename.str());
+		funcs.push_back(sine(RAND_RANGE(0.005, 0.0010), RAND_RANGE(1.0, 30.0), 0));
+	}
 	names.push_back("az");
-
 	vector<function<double(double)> > com_funcs;
-	com_funcs.push_back(constant(200));
-	com_funcs.push_back(sine(3212645.65, 0.5, 0));
+	com_funcs.push_back(constant(-9.8));
+	com_funcs.push_back(sine(RAND_RANGE(0.005, 0.0010), RAND_RANGE(1.0, 30.0), 0));
 	funcs.push_back(comp_func(com_funcs));
-	names.push_back("pvar");
-	com_funcs.clear();
-	com_funcs.push_back(constant(700));
-	com_funcs.push_back(sine(0.0000005, 700, 0));
-	funcs.push_back(comp_func(com_funcs));
-	names.push_back("psin");
 
-	funcs.push_back(linear(-0.02, 20000));
+	for (int i=0; i<150; i++){
+		filename.str("");
+		filename<<"pvar"<<i;
+		names.push_back(filename.str());
+
+		com_funcs.clear();
+		com_funcs.push_back(constant(RAND_RANGE(600, 800)));
+		com_funcs.push_back(sine(RAND_RANGE(3000000.0, 3500000.0), RAND_RANGE(1, 50), 0));
+		funcs.push_back(comp_func(com_funcs));
+	}
+
+	for (int i=0; i<50; i++){
+		filename.str("");
+		filename<<"psin"<<i;
+		names.push_back(filename.str());
+
+		com_funcs.clear();
+		int val = RAND_RANGE(400, 900);
+		com_funcs.push_back(constant(val));
+		com_funcs.push_back(sine(RAND_RANGE(0.01, 0.1), val, 0));
+		funcs.push_back(comp_func(com_funcs));
+	}
+	
 	names.push_back("fuel");
-	funcs.push_back(constant(180));
+	funcs.push_back(linear(RAND_RANGE(-0.1, -0.5), 100000));
 	names.push_back("pass");
-	funcs.push_back(constant(100000));
+	funcs.push_back(constant((int)RAND_RANGE(100, 200)));
 	names.push_back("bagg");
+	funcs.push_back(constant(RAND_RANGE(300000, 380000)));
 
 	double * data;
 	for (int i=0; i<funcs.size(); i++){

@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <cmath>
+#include <cstring>
 
 #include <iostream>
 #include <iomanip>
@@ -18,9 +19,12 @@
 
 #define SENSOR_N 4
 
-#define PLANE_MAX_WEIGHT 300000
+#define PLANE_MAX_WEIGHT 3000000
 #define PERSON_WEIGHT_MIN 200
 #define PERSON_WEIGHT_MED 700
+
+#define SQR(x) ((x)*(x))
+#define RAD_TO_DEG(rad) ((rad)*(180.0/M_PI))
 
 using namespace std;
 
@@ -113,7 +117,7 @@ vector<double> vect_trans(vector<double> vect)
 	vector<double> v = vector<double>(3);
 
 	//calculo da coordenada polar R = sqrt(x^2 + y^2 + z^2)
-	v[0] = sqrt(vect[0]*vect[0] + vect[1]*vect[1] + vect[2]*vect[2]);
+	v[0] = sqrt(SQR(vect[0]) +  SQR(vect[1]) + SQR(vect[2]));
 	//calculo da coordenada polar theta = arctg(y/x)
 	v[1] = atan2(vect[1], vect[0]);
 	//calculo da coordenada polar fi = arccos(z/R)
@@ -127,12 +131,7 @@ vector<double> sum_thresh(vector<double> vect)
 {
 	//variavel para armazenar numero de passageiros
 	double pass = 0;
-
-	for(int i = 0; i < vect.size(); i++){
-		if(vect[i] >= PERSON_WEIGHT_MIN){
-			pass++;
-		}
-	}
+	for(int i = 0; i < vect.size(); i++) if(vect[i] >= PERSON_WEIGHT_MIN) pass++;
 	
 	vector<double> v = vector<double>(1);
 	v[0] = pass;
@@ -142,24 +141,83 @@ vector<double> sum_thresh(vector<double> vect)
 //recebe a quantidade de combustivel no tanque (em kg), a quantidade de carga no deck (em kg) e o numero de passageiros que entraram no aviao
 vector<double> sum_perc(vector<double> vect)
 {
-	//variavel que armazena o peso total calculado ate agora
-	double total = 0;
-
-	//multiplica a quantidade de pessoas pelo peso medio de um adulto e adiciona ao peso total calculado ate agora
-	for(int i = 0; i < vect.size(); i++) total += vect[2]*PERSON_WEIGHT_MED;
-
 	vector<double> v = vector<double>(1);
-	v[0] = total/PLANE_MAX_WEIGHT;
+	v[0] = (vect[0] + vect[1] + vect[2]*PERSON_WEIGHT_MED)/PLANE_MAX_WEIGHT;
 	return v;
+}
+
+double ** gps_matrix(double ** sat_data)
+{
+	size_t i, j;
+	double ** gps_mat = (double**) malloc(4*sizeof(double*));
+	for (i=0; i<4; i++) gps_mat[i] = (double*) malloc(3*sizeof(double));
+
+	for (i=0; i<3; i++) for (j=0; j<3; j++) gps_mat[i][j] = sat_data[0][j] - sat_data[i+1][j];
+
+	double cons = SQR(sat_data[0][3]) - SQR(sat_data[0][0]) - SQR(sat_data[0][1]) - SQR(sat_data[0][2]);
+	for (i=0; i<3; i++){
+		gps_mat[3][i] = SQR(sat_data[i+1][3]) - cons;
+		for (j=0; j<3; j++) gps_mat[3][i]-=SQR(sat_data[i+1][j]);
+		gps_mat[3][i]/=2.0;
+	}
+
+	return gps_mat;
+}
+
+double * gauss_elim(double ** mat, double * res, size_t order)
+{
+	size_t i, j, k;
+	double ** aux_mat = (double**) malloc(order*sizeof(double*));
+	for (i=0; i<order; i++){
+		aux_mat[i] = (double*) malloc(order*sizeof(double));
+		memcpy(aux_mat[i], mat[i], order*sizeof(mat));
+	}
+	double * aux_res = (double*) malloc(order*sizeof(double));
+	memcpy(aux_res, res, order*sizeof(double));
+	
+	double coef;
+	for (j=0; j<order-1; j++){
+		for (i=j+1; i<order; i++){
+			coef = -aux_mat[i][j]/aux_mat[j][j];
+			
+			for (k=0; k<order; k++) aux_mat[i][k]+=coef*aux_mat[j][k];
+			aux_res[i]+=coef*aux_res[j];
+		}
+	}
+
+	double sum;
+	double * sol = (double*) malloc(order*sizeof(double));
+	for (i=order-1; i<order; i--){
+		sum = aux_res[i];
+		for (j=i+1; j<order; j++) sum-=sol[j]*aux_mat[i][j];
+
+		sol[i] = sum/aux_mat[i][i];
+	}
+
+	for (i=0; i<order; i++) free(aux_mat[i]);
+	free(aux_mat);
+	free(aux_res);
+	return sol;
 }
 
 vector<double> local(vector<double> vect)
 {
-	vector<double> v = vector<double>(3);
-	for(int i = 0; i < 3; i++){
-		v[i] = vect[i];
-	}
-	return v;
+	double ** mat = new double*[4];
+	for (int i=0; i<4; i++) mat[i] = new double[4];
+	for (int i=0; i<vect.size(); i++) mat[i/4][i%4] = vect[i];
+
+	double ** gps_mat = gps_matrix(mat);
+	for (int i=0; i<4; i++) delete[] mat[i];
+	delete[] mat;
+	
+	double * p = gauss_elim(gps_mat, gps_mat[3], 3);
+	vector<double> cart = vector<double>(3);
+	for(int i=0; i<3; i++) cart[i] = p[i];
+
+	for (int i=0; i<4; i++) free(gps_mat[i]);
+	free(gps_mat);
+	free(p);
+	return vect_trans(cart);
 }
 
 
@@ -197,26 +255,41 @@ int main(int argc, char * argv[])
 	<<"Sensor 3: Numero de Passageiros Sentados"<<endl
 	<<"Sensor 4: Porcentagem da Carga Máxima"<<endl;
 	
-	cout<<setprecision(4);
+	cout<<setprecision(8);
 	int op = -1;
 	size_t samples = 0;
 	while (op!=0){
 		cin>>op;
-		if (op>0 && op<SENSOR_N){
+		if (op>0 && op<=SENSOR_N){
 			cin>>samples;
 			vs[op-1].call_physen(samples);
 			for (int i=0; i<samples; i++){
 				vs[op-1].receive_sample();
 				if (verbose){
 					cout<<"Dados: ";
-					for (int j=0; j<vs[op-1].physen_data.size(); j++) printf("%.4lf ", vs[op-1].physen_data[j]);
+					for (int j=0; j<vs[op-1].physen_data.size(); j++) cout<<vs[op-1].physen_data[j]<<" ";
 					cout<<endl;
 				}
 
 				vector<double> result = vs[op-1].calculate();
-				cout<<"Resultado: ";
-				for(int j=0; j<result.size(); j++) printf("%.4lf ", result[j]);
-				cout<<endl;
+				switch (op){
+					case 1:
+						cout<<RAD_TO_DEG(((M_PI/2.0)-result[1]))<<" N, "<<RAD_TO_DEG(result[2])<<" E"<<endl;
+						break;
+
+					case 2:
+						cout<<result[0]<<" m/s^2, "<<RAD_TO_DEG(((M_PI/2.0)-result[1]))<<" Inclinacao, "<<RAD_TO_DEG(result[2])<<" Direcao"<<endl;
+						break;
+
+					case 3:
+						cout<<result[0]<<" Passageiros Sentados"<<endl;
+						break;
+
+					case 4:
+						cout<<result[0]<<"\%"<<endl;
+						break;
+
+				}
 				usleep(1000000/OBS_PER_SEC);
 			}
 		}

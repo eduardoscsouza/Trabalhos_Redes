@@ -137,8 +137,8 @@ int main(int argc, char * argv[])
 		filename.str("");
 		if (i<16) filename<<((i%4==3) ? ('d') : (char)('x'+(i%4)))<<(i/4)+1;
 		else if (i<19) filename<<"a"<<(char)('x'+(i-16));
-		else if (i<169) filename<<"pvar";
-		else if (i<219) filename<<"psin";
+		else if (i<169) filename<<"pvar"<<(i-19);
+		else if (i<219) filename<<"psin"<<(i-169);
 		else if (i==219) filename<<"fuel";
 		else if (i==220) filename<<"pass";
 		else filename<<"bagg";
