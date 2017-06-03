@@ -253,6 +253,8 @@ int Server::accept_clients(size_t client_count, bool verbose)
 
 		this->peers.push_back(new_peer);
 	}
+
+	return 0;
 }
 
 /*

@@ -3,7 +3,7 @@
 #Gustavo Cabral					9293028
 
 all:
-	g++ -c -std=c++14 -O3 socketstream.cpp  -o socketstream.o
+	g++ -c -std=c++14 -O3 socketstream.cpp -o socketstream.o
 	g++ -std=c++14 -O3 socketstream.o physicalsensor.cpp -o physicalsensor.out
 	g++ -lm -std=c++14 -O3 socketstream.o virtualsensor.cpp -o virtualsensor.out
 	g++ -lm -std=c++14 -O3 datagenerator.cpp -o datagenerator.out
