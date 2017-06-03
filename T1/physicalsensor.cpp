@@ -158,12 +158,16 @@ public:
 
 int main(int argc, char * argv[])
 {
+	/*
 	if (argc!=1 && argc!=3){
 		cout<<"---USO---"<<endl<<"/virtualsensor.out"<<"OU"<<endl<<"/virtualsensor.out <ip> <porta>"<<endl;
 		return 0;
 	}
 	string add = string((argc==3) ? argv[1] : LOOPBACK_ADDR);
 	short port = (argc==3) ? atoi(argv[2]) : BASEPORT;
+	*/
+	string add = LOOPBACK_ADDR;
+	short port = BASEPORT;
 
 	PhysicalSensor * ps = new PhysicalSensor[SENSOR_N];
 	bool * alive = new bool[SENSOR_N];
