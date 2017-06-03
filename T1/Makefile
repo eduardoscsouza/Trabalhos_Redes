@@ -3,15 +3,18 @@
 #Gustavo Cabral					9293028
 
 all:
-	g++ socketstream.cpp -o socketstream.o -c -std=c++11
-	g++ socketstream.o physicalsensor.cpp -o physicalsensor.out -std=c++11
-	g++ socketstream.o virtualsensor.cpp -o virtualsensor.out -lm -std=c++11
-	g++ datagenerator.cpp -o datagenerator.out -lm -std=c++11
+	g++ socketstream.cpp -o socketstream.o -c -std=c++11 -O3
+	g++ socketstream.o physicalsensor.cpp -o physicalsensor.out -std=c++11 -O3
+	g++ socketstream.o virtualsensor.cpp -o virtualsensor.out -lm -std=c++11 -O3
+	g++ datagenerator.cpp -o datagenerator.out -lm -std=c++11 -O3
 
 clean:
-	rm *.o *.out *.dat
+	rm -f *.o *.out *.dat ./data/*.dat
+
+gen_data:
+	mkdir -p data
+	./datagenerator.out
 
 run:
-	./datagenerator.out
 	sleep 1s && ./physicalsensor.out &
 	./virtualsensor.out

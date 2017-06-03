@@ -69,9 +69,17 @@ public:
 
 	void load_data(const char * data_filename, size_t data_count)
 	{
-		FILE * data_file = fopen(data_filename, "r+");
+		FILE * data_file = fopen(data_filename, "r");
+		if (data_file == NULL){
+			cout<<"Error opening data file"<<endl<<"Have you generated the data files?"<<endl;
+			return;
+		}
+
 		this->data = new double[this->data_count=data_count];
-		fread(this->data, this->data_count, sizeof(double), data_file);
+		if(fread(this->data, this->data_count, sizeof(double), data_file) != this->data_count){
+			cout<<"Error loading data"<<endl<<"Have you generated the data files?"<<endl;
+			return;
+		}
 
 		ftime(&(this->dataload_time));
 		fclose(data_file);

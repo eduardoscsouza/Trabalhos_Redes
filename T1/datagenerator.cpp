@@ -165,8 +165,10 @@ int main(int argc, char * argv[])
 	for (int i=0; i<funcs.size(); i++){
 		data = generate_data(funcs[i], 0, SEC_IN_DAY, SAMPLE_SIZE);
 
-		write_data((names[i] + ".dat").c_str(), data, SAMPLE_SIZE);
-		free(data);
+		filename.str("");
+		filename<<"./data/"<<names[i]<<".dat";
+		write_data(filename.str().c_str(), data, SAMPLE_SIZE);
+		delete[] data;
 	}
 
 	return 0;
