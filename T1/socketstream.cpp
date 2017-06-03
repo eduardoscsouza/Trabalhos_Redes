@@ -1,5 +1,11 @@
+/*
+Eduardo Santos Carlos de Souza	9293481
+Fabrício Guedes Faria			9293522
+Gustavo Cabral					9293028
+*/
+
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/ip.h>
@@ -24,12 +30,19 @@ Socket::~Socket()
 	this->clear();
 }
 
+/*
+Incializa o socket usando a funcao do sistema
+O socket é do tipo Stream e utiliza o protocolo IP
+*/
 void Socket::initialize(bool verbose)
 {
 	this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (this->socket_fd < 0) if (verbose) cout<<"Error creating socket"<<endl;
 }
 
+/*
+Fecha o socket usando a funcao do sistema
+*/
 void Socket::close_socket(bool verbose)
 {
 	if (this->socket_fd>0 && close(this->socket_fd)<0) if (verbose) cout<<"Error closing socket"<<endl;
@@ -60,6 +73,9 @@ InetAddress::~InetAddress()
 	this->clear();
 }
 
+/*
+Monta a struct do endereco IP com o IP dado por ip_addr e a Porta port
+*/
 int InetAddress::set(const char * ip_addr, unsigned short port, bool verbose)
 {
 	this->address.sin_addr.s_addr = inet_addr(ip_addr);
@@ -96,6 +112,10 @@ Client::~Client()
 	this->clear();
 }
 
+/*
+Criar o socket e monta o endereco IP com os dados dado como argumento
+Depois, conecta o cliente ao servidos especificado utilizando a funcao do sistema
+*/
 int Client::connect_to_server(const char * ip_addr, unsigned short port, bool verbose)
 {
 	this->socket.initialize(verbose);
@@ -109,6 +129,9 @@ int Client::connect_to_server(const char * ip_addr, unsigned short port, bool ve
 	return 0;
 }
 
+/*
+Funcao bloqueante para enviar qualquer vetor de bytes para o servidor
+*/
 int Client::send(void * data, size_t nbytes, bool verbose)
 {
 	if (write(this->socket.socket_fd, data, nbytes) != nbytes){
@@ -119,6 +142,9 @@ int Client::send(void * data, size_t nbytes, bool verbose)
 	return 0;
 }
 
+/*
+Funcao bloqueante para ler qualquer vetor de bytes do servidor
+*/
 int Client::receive(void * data, size_t nbytes, bool verbose)
 {
 	if (read(this->socket.socket_fd, data, nbytes) != nbytes){
@@ -129,6 +155,9 @@ int Client::receive(void * data, size_t nbytes, bool verbose)
 	return 0;
 }
 
+/*
+Fecha o cliente
+*/
 void Client::close_client(bool verbose)
 {
 	this->socket.close_socket(verbose);
@@ -181,6 +210,10 @@ Server::~Server()
 	this->clear();
 }
 
+/*
+Funcao que inicializa os atributos do objeto Servidor.
+Depois liga o objeto Servidor a porta e ao IP dados nos argumetos
+*/
 int Server::bind_to_server(const char * ip_address, unsigned short port, bool verbose)
 {
 	this->socket.initialize(verbose);
@@ -194,6 +227,10 @@ int Server::bind_to_server(const char * ip_address, unsigned short port, bool ve
 	return 0;
 }
 
+/*
+Funcao bloqueante onde o servidor espera que client_count clientes
+facam a conexao e aceita cada cliente
+*/
 int Server::accept_clients(size_t client_count, bool verbose)
 {
 	if(listen(this->socket.socket_fd, this->backlog_size) < 0){
@@ -213,6 +250,9 @@ int Server::accept_clients(size_t client_count, bool verbose)
 	}
 }
 
+/*
+Funcao bloqueante para enviar qualquer vetor de bytes para o cliente especificado por peer_od
+*/
 int Server::send(size_t peer_id, void * data, size_t nbytes, bool verbose)
 {
 	if (write(this->peers[peer_id].socket.socket_fd, data, nbytes) != nbytes){
@@ -223,6 +263,9 @@ int Server::send(size_t peer_id, void * data, size_t nbytes, bool verbose)
 	return 0;
 }
 
+/*
+Funcao bloqueante para receber qualquer vetor de bytes do cliente especificado por peer_od
+*/
 int Server::receive(size_t peer_id, void * data, size_t nbytes, bool verbose)
 {
 	if (read(this->peers[peer_id].socket.socket_fd, data, nbytes) != nbytes){
@@ -233,6 +276,9 @@ int Server::receive(size_t peer_id, void * data, size_t nbytes, bool verbose)
 	return 0;
 }
 
+/*
+Fecha o cliente
+*/
 void Server::close_server(bool verbose)
 {
 	this->socket.close_socket(verbose);

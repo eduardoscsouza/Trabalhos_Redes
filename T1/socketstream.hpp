@@ -1,9 +1,18 @@
+/*
+Eduardo Santos Carlos de Souza	9293481
+Fabrício Guedes Faria			9293522
+Gustavo Cabral					9293028
+*/
+
 #ifndef SOCKETSTREAM_HPP
 #define SOCKETSTREAM_HPP
 
 #include <arpa/inet.h>
 #include <vector>
 
+/*
+Classe para lidar com os sockets da biblioteca sys/socket
+*/
 class Socket
 {
 public:
@@ -13,10 +22,16 @@ public:
 	~Socket();
 
 	void initialize(bool=true);
+	/*
+	Fecha o socket
+	*/
 	void close_socket(bool=true);
 	void clear();
 };
 
+/*
+Classe para lidar com os enderecos IP da biblioteca arpa/inet
+*/
 class InetAddress
 {
 public:
@@ -30,6 +45,9 @@ public:
 	void clear();
 };
 
+/*
+Classe do cliente para o padrao cliente/servidor
+*/
 class Client
 {
 public:
@@ -48,6 +66,9 @@ public:
 	void clear();
 };
 
+/*
+Classe do servidor para o padrao cliente/servidor
+*/
 class Server
 {
 public:
@@ -55,6 +76,9 @@ public:
 	InetAddress addr;
 	int backlog_size;
 
+	/*
+	Classe aninhada para armazenar os dados dos clientes
+	*/
 	class Peer
 	{
 	public:

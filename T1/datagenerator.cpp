@@ -1,3 +1,9 @@
+/*
+Eduardo Santos Carlos de Souza	9293481
+Fabrício Guedes Faria			9293522
+Gustavo Cabral					9293028
+*/
+
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
