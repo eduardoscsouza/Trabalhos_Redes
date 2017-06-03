@@ -308,18 +308,8 @@ vector<double> local(vector<double> vect)
 
 int main(int argc, char * argv[])
 {
-	/*
-	if (argc!=1 && argc!=3){
-		cout<<"---USO---"<<endl<<"/virtualsensor.out"<<"OU"<<endl<<"/virtualsensor.out <ip> <porta>"<<endl;
-		return 0;
-	}
-	string add = string((argc==3) ? argv[1] : LOOPBACK_ADDR);
-	short port = (argc==3) ? atoi(argv[2]) : BASEPORT;*/
-	string add = LOOPBACK_ADDR;
-	short port = BASEPORT;
-
 	VirtualSensor * vs = new VirtualSensor[SENSOR_N];
-	for (int i=0; i<SENSOR_N; i++) vs[i] = VirtualSensor(add.c_str(), port+i);
+	for (int i=0; i<SENSOR_N; i++) vs[i] = VirtualSensor(LOOPBACK_ADDR, BASEPORT+i);
 	
 	vs[0].accept_physen(16);
 	vs[1].accept_physen(3);

@@ -158,17 +158,6 @@ public:
 
 int main(int argc, char * argv[])
 {
-	/*
-	if (argc!=1 && argc!=3){
-		cout<<"---USO---"<<endl<<"/virtualsensor.out"<<"OU"<<endl<<"/virtualsensor.out <ip> <porta>"<<endl;
-		return 0;
-	}
-	string add = string((argc==3) ? argv[1] : LOOPBACK_ADDR);
-	short port = (argc==3) ? atoi(argv[2]) : BASEPORT;
-	*/
-	string add = LOOPBACK_ADDR;
-	short port = BASEPORT;
-
 	PhysicalSensor * ps = new PhysicalSensor[SENSOR_N];
 	bool * alive = new bool[SENSOR_N];
 	for (int i=0; i<SENSOR_N; i++) ps[i] = PhysicalSensor();
@@ -193,11 +182,11 @@ int main(int argc, char * argv[])
 		//Carrega os dados
 		ps[i].load_data(filename.str().c_str(), SAMPLE_SIZE);
 		//Liga o sensor ao sensor virtual certo
-		if (i<16) ps[i].connect_to_virtsens(add.c_str(), port);
-		else if (i<19) ps[i].connect_to_virtsens(add.c_str(), port+1);
-		else if (i<219) ps[i].connect_to_virtsens(add.c_str(), port+2);
-		else if (i<222) ps[i].connect_to_virtsens(add.c_str(), port+3);
-		else ps[i].connect_to_virtsens(add.c_str(), port+4);
+		if (i<16) ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT);
+		else if (i<19) ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT+1);
+		else if (i<219) ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT+2);
+		else if (i<222) ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT+3);
+		else ps[i].connect_to_virtsens(LOOPBACK_ADDR, BASEPORT+4);
 	}
 
 	/*
