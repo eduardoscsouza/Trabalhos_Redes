@@ -22,7 +22,7 @@ Gustavo Cabral					9293028
 #define SEC_IN_DAY 86400
 #define SAMPLE_SIZE (SEC_IN_DAY * OBS_PER_SEC)
 
-#define SENSOR_N 222
+#define SENSOR_N 232
 #define WAITING 1
 #define SENDING 2
 #define DEAD 0
@@ -180,9 +180,10 @@ int main(int argc, char * argv[])
 		else if (i<19) filename<<"a"<<(char)('x'+(i-16));
 		else if (i<169) filename<<"pvar"<<(i-19);
 		else if (i<219) filename<<"psin"<<(i-169);
-		else if (i==219) filename<<"fuel";
-		else if (i==220) filename<<"pass";
-		else filename<<"bagg";
+		else if (i<220) filename<<"fuel";
+		else if (i<221) filename<<"pass";
+		else if (i<222) filename<<"bagg";
+		else filename<<"cel"<<(i-222);
 		filename<<".dat";
 
 		//Carrega os dados
@@ -191,7 +192,8 @@ int main(int argc, char * argv[])
 		if (i<16) ps[i].connect_to_virtsens(add.c_str(), port);
 		else if (i<19) ps[i].connect_to_virtsens(add.c_str(), port+1);
 		else if (i<219) ps[i].connect_to_virtsens(add.c_str(), port+2);
-		else ps[i].connect_to_virtsens(add.c_str(), port+3);
+		else if (i<222) ps[i].connect_to_virtsens(add.c_str(), port+3);
+		else ps[i].connect_to_virtsens(add.c_str(), port+4);
 	}
 
 	/*

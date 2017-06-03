@@ -160,6 +160,20 @@ int main(int argc, char * argv[])
 	names.push_back("bagg");
 	funcs.push_back(constant(RAND_RANGE(300000, 380000)));
 
+	//Funcoes do sinal emitido pelos celulares
+	for (int i=0; i<10; i++){
+		filename.str("");
+		filename<<"cel"<<i;
+		names.push_back(filename.str());
+
+		com_funcs.clear();
+		double val = RAND_RANGE(0.01, 0.1);
+		com_funcs.push_back(constant(1.1*val));
+		com_funcs.push_back(sine(RAND_RANGE(3000.0, 5000.0), val, 0));
+		com_funcs.push_back(sine(RAND_RANGE(100000.0, 300000.0), 0.1*val, 0));
+		funcs.push_back(comp_func(com_funcs));
+	}
+
 	//Aplicar as funcoes e guardar o resultado
 	double * data;
 	for (int i=0; i<funcs.size(); i++){

@@ -23,7 +23,7 @@ Gustavo Cabral					9293028
 #define SEC_IN_DAY 86400
 #define SAMPLE_SIZE (SEC_IN_DAY * OBS_PER_SEC)
 
-#define SENSOR_N 4
+#define SENSOR_N 5
 
 #define PLANE_MAX_WEIGHT 3000000
 #define PERSON_WEIGHT_MIN 200
@@ -158,6 +158,19 @@ vector<double> vect_trans(vector<double> vect)
 	//Calculo da coordenada polar phi = arccos(z/R)
 	v[2] = acos(vect[2]/v[0]);
 
+	return v;
+}
+
+/*
+Recebe o sinal emitido pelos celulares da tripulacao e retorna o total do ruido
+*/
+vector<double> sum(vector<double> vect)
+{
+	double noise = 0;
+	for(int i=0; i<vect.size(); i++) noise+=vect[i];
+
+	vector<double> v = vector<double>(1);
+	v[0] = noise;
 	return v;
 }
 
@@ -309,11 +322,13 @@ int main(int argc, char * argv[])
 	vs[1].accept_physen(3);
 	vs[2].accept_physen(200);
 	vs[3].accept_physen(3);
+	vs[4].accept_physen(10);
 
 	vs[0].set_func(&local);
 	vs[1].set_func(&vect_trans);
 	vs[2].set_func(&sum_thresh);
 	vs[3].set_func(&sum_perc);
+	vs[4].set_func(&sum);
 
 	bool verbose;
 	cout<<endl<<"Deseja ver os dados que os sensores virtuais recebem, ou apenas o resultado?"<<endl<<"(1/0)"<<endl;
@@ -324,7 +339,8 @@ int main(int argc, char * argv[])
 	<<"Sensor 1: Posicao GPS"<<endl
 	<<"Sensor 2: Aceleracao"<<endl
 	<<"Sensor 3: Numero de Passageiros Sentados"<<endl
-	<<"Sensor 4: Porcentagem da Carga Máxima"<<endl;
+	<<"Sensor 4: Porcentagem da Carga Máxima"<<endl
+	<<"Sensor 5: Ruído gerado pelos celulares"<<endl;
 	
 	cout<<setprecision(8);
 	int op = -1;
@@ -360,6 +376,10 @@ int main(int argc, char * argv[])
 
 					case 4:
 						cout<<result[0]<<"\%"<<endl;
+						break;
+
+					case 5:
+						cout<<result[0]<<" dB"<<endl;
 						break;
 
 				}
