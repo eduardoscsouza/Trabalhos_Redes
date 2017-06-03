@@ -148,7 +148,7 @@ int main(int argc, char * argv[])
 		com_funcs.clear();
 		int val = RAND_RANGE(400, 900);
 		com_funcs.push_back(constant(val));
-		com_funcs.push_back(sine(RAND_RANGE(0.01, 0.1), val, 0));
+		com_funcs.push_back(sine(RAND_RANGE(0.02, 0.2), val, 0));
 		funcs.push_back(comp_func(com_funcs));
 	}
 	
