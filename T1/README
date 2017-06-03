@@ -23,5 +23,5 @@ Automatico:
 Manual:
 	mkdir -p data
 	./datagenerator.out
-    terminal 1 - ./physicalsensor.out
-    terminal 2 - ./virtualsensor.out
+	terminal 1 - ./physicalsensor.out
+	terminal 2 - ./virtualsensor.out
