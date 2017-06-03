@@ -353,7 +353,7 @@ int main(int argc, char * argv[])
 		if (op>0 && op<=SENSOR_N){
 			cin>>samples;
 			//Pede que os sensores fisicos mandem os dados
-			vs[op-1].call_physen(samples);
+			if(samples>0) vs[op-1].call_physen(samples);
 			for (int i=0; i<samples; i++){
 				//Le os dados
 				vs[op-1].receive_sample();
