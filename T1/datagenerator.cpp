@@ -1,7 +1,8 @@
 /*
 Eduardo Santos Carlos de Souza	9293481
 Fabrício Guedes Faria			9293522
-Gustavo Cabral					9293028
+Guilherme Hideo Tubone			9019403
+Lucas de Oliveira Pacheco		9293182
 */
 
 #include <cstdio>
