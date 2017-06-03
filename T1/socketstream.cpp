@@ -118,9 +118,11 @@ Depois, conecta o cliente ao servidos especificado utilizando a funcao do sistem
 */
 int Client::connect_to_server(const char * ip_addr, unsigned short port, bool verbose)
 {
+	//Inicializar atributos
 	this->socket.initialize(verbose);
 	this->server_addr.set(ip_addr, port, verbose);
 	
+	//Conectar no servidor
 	if (connect(this->socket.socket_fd, (const struct sockaddr*) &(this->server_addr.address), sizeof(this->server_addr.address)) < 0){
 		if (verbose) cout<<"Error connecting socket to server"<<endl;
 		return -1;
@@ -216,9 +218,11 @@ Depois liga o objeto Servidor a porta e ao IP dados nos argumetos
 */
 int Server::bind_to_server(const char * ip_address, unsigned short port, bool verbose)
 {
+	//Incializar atributos
 	this->socket.initialize(verbose);
 	this->addr.set(ip_address, port, verbose);
 
+	//Linkar servidor
 	if(bind(this->socket.socket_fd, (const struct sockaddr*) &(this->addr.address), sizeof(this->addr.address)) < 0){
 		if (verbose) cout<<"Error binding socket"<<endl;
 		return -1;
@@ -233,6 +237,7 @@ facam a conexao e aceita cada cliente
 */
 int Server::accept_clients(size_t client_count, bool verbose)
 {
+	//Botar o servidor para escutar por conexoes
 	if(listen(this->socket.socket_fd, this->backlog_size) < 0){
 		if (verbose) cout<<"Error listening for connection"<<endl;
 		return -1;

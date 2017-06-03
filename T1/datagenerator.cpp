@@ -23,21 +23,33 @@ using namespace std;
 
 
 
+/*
+Funcao que gera uma funcao linear com os atributos dados
+*/
 function<double(double)> linear(double a, double b) 
 {
 	return ([=](double x) -> double { return a*x + b; });
 }
 
+/*
+Funcao que gera uma funcao seno com os atributos dados
+*/
 function<double(double)> sine(double freq, double ampl, double ang)
 {
 	return ([=](double x) -> double { return ampl*sin(freq*x + ang); });
 }
 
+/*
+Funcao que gera uma funcao constante com os atributos dados
+*/
 function<double(double)> constant(double cons)
 {
 	return ([=](double x) -> double { return cons; });
 }
 
+/*
+Funcao que gera uma funcao composta pela somatoria das funcoes do vetor funcs
+*/
 function<double(double)> comp_func(vector<function<double(double)> > funcs)
 {
 	return
@@ -52,6 +64,9 @@ function<double(double)> comp_func(vector<function<double(double)> > funcs)
 
 
 
+/*
+Funcao que armazena o vetor de doubles em um arquivo
+*/
 void write_data(const char * filename, double * data, size_t data_count)
 {
 	FILE * data_file = fopen(filename, "w");
@@ -59,6 +74,10 @@ void write_data(const char * filename, double * data, size_t data_count)
 	fclose(data_file);
 }
 
+/*
+Funcao que aplica a funcao func em samples pontos durante os tempos t0 e tf, e retorna
+um vetor com os resultados
+*/
 double * generate_data(function<double(double)> func, double t0, double tf, size_t samples)
 {
 	double * data = new double[samples];
@@ -74,9 +93,6 @@ double * generate_data(function<double(double)> func, double t0, double tf, size
 
 
 
-
-
-
 int main(int argc, char * argv[])
 {
 	/*
@@ -86,6 +102,7 @@ int main(int argc, char * argv[])
 	vector<function<double(double)> > funcs;
 	vector<string> names;
 
+	//Funcoes para o GPS
 	stringstream filename;
 	for (int i=0; i<16; i++){
 		filename.str("");
@@ -96,18 +113,21 @@ int main(int argc, char * argv[])
 		else funcs.push_back(constant(RAND_RANGE(6380000, 6400000)));
 	}
 
+	//Funcoes de aceleracao no plano xy
 	for (int i=0; i<2; i++){
 		filename.str("");
 		filename<<"a"<<((char)('x'+i));
 		names.push_back(filename.str());
 		funcs.push_back(sine(RAND_RANGE(0.005, 0.0010), RAND_RANGE(1.0, 30.0), 0));
 	}
+	//Funcao de aceleracao do eixo z
 	names.push_back("az");
 	vector<function<double(double)> > com_funcs;
 	com_funcs.push_back(constant(-9.8));
 	com_funcs.push_back(sine(RAND_RANGE(0.005, 0.0010), RAND_RANGE(1.0, 30.0), 0));
 	funcs.push_back(comp_func(com_funcs));
 
+	//Funcoes de pressao dos passageiros que se mantem sentados durante todo o voo
 	for (int i=0; i<150; i++){
 		filename.str("");
 		filename<<"pvar"<<i;
@@ -119,6 +139,7 @@ int main(int argc, char * argv[])
 		funcs.push_back(comp_func(com_funcs));
 	}
 
+	//Funcao de pressai para os passageiros que se levantam
 	for (int i=0; i<50; i++){
 		filename.str("");
 		filename<<"psin"<<i;
@@ -131,6 +152,7 @@ int main(int argc, char * argv[])
 		funcs.push_back(comp_func(com_funcs));
 	}
 	
+	//Funcao da carga total do aviao
 	names.push_back("fuel");
 	funcs.push_back(linear(RAND_RANGE(-0.1, -0.5), 100000));
 	names.push_back("pass");
@@ -138,12 +160,13 @@ int main(int argc, char * argv[])
 	names.push_back("bagg");
 	funcs.push_back(constant(RAND_RANGE(300000, 380000)));
 
+	//Aplicar as funcoes e guardar o resultado
 	double * data;
 	for (int i=0; i<funcs.size(); i++){
 		data = generate_data(funcs[i], 0, SEC_IN_DAY, SAMPLE_SIZE);
 
 		write_data((names[i] + ".dat").c_str(), data, SAMPLE_SIZE);
-		free (data);
+		free(data);
 	}
 
 	return 0;
