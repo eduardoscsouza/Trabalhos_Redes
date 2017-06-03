@@ -82,7 +82,7 @@ public:
 			return;
 		}
 
-		this->data = new double[this->data_count=data_count];
+		this->data = new double[this->data_count=data_count];//double[this->data_count=data_count];
 		if(fread(this->data, sizeof(double), this->data_count, data_file) != this->data_count){
 			cout<<"Error loading data"<<endl;
 			return;
@@ -149,7 +149,7 @@ public:
 	*/
 	void close_sensor()
 	{
-		delete this->data;
+		delete[] this->data;
 		this->client.close_client();
 	}
 };
@@ -213,8 +213,8 @@ int main(int argc, char * argv[])
 		usleep(1000000/OBS_PER_SEC);
 	}
 	
+	for (int i=0; i<SENSOR_N; i++) ps[i].close_sensor();
 	delete[] ps;
 	delete[] alive;
-	for (int i=0; i<SENSOR_N; i++) ps[i].close_sensor();
 	return 0;
 }

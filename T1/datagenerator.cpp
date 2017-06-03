@@ -168,7 +168,7 @@ int main(int argc, char * argv[])
 		filename.str("");
 		filename<<"./data/"<<names[i]<<".dat";
 		write_data(filename.str().c_str(), data, SAMPLE_SIZE);
-		delete[] data;
+		delete data;
 	}
 
 	return 0;

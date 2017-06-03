@@ -36,6 +36,9 @@ using namespace std;
 
 
 
+/*
+Classe do sensor virtual do trabalho
+*/
 class VirtualSensor
 {
 public:
@@ -72,21 +75,33 @@ public:
 
 
 
+	/*
+	Define a funcao que o sensor virtual aplicara nos dados recebidos
+	*/
 	void set_func(function<vector<double>(vector<double>)> func)
 	{
 		this->func = func;
 	}
 
+	/*
+	Aplica a funcao definida
+	*/
 	vector<double> calculate()
 	{
 		return this->func(this->physen_data);
 	}
 
+	/*
+	Linka o sensor a um servidor
+	*/
 	void bind_to_server(const char * ip_addr, unsigned short port)
 	{
 		this->server.bind_to_server(ip_addr, port);
 	}
 
+	/*
+	Conecta o sensor a physen_count sensores virtuais
+	*/
 	void accept_physen(size_t physen_count)
 	{
 		this->server.accept_clients(physen_count);
@@ -94,6 +109,11 @@ public:
 		this->physen_data = vector<double>(physen_count);
 	}
 
+	/*
+	Envia para os sensores fisicos um bool=true e um inteiro que diz quantas leituras
+	o sensor virtual quer que sejam enviadas a ele. Caso esse numero seja 0, significa
+	que o sensor fisico deve fechar.
+	*/
 	void call_physen(size_t samples)
 	{
 		bool call = true;
@@ -103,12 +123,18 @@ public:
 		}
 	}
 
+	/*
+	Armazena as leituras enviadas pelos sensores fisicos
+	*/
 	void receive_sample()
 	{
 		for (int i=0; i<this->physen_count; i++)
 			this->server.receive(i, &(this->physen_data[i]), sizeof(double));
 	}
 
+	/*
+	Fecha o sensor virtual
+	*/
 	void close_sensor()
 	{
 		this->server.close_server();
@@ -116,47 +142,82 @@ public:
 };
 
 
-//recebe a aceleracao da aeronave nos tres eixos e retorna a aceleracao resultante
+/*
+Recebe um vetor em coordenadas cartesianas e retorna
+em coordenadas polares
+*/
 vector<double> vect_trans(vector<double> vect)
 {
-	//cria o vetor que recebera as coordenadas polares do vetor aceleracao resultante
+	//cCia o vetor que recebera as coordenadas polares
 	vector<double> v = vector<double>(3);
 
-	//calculo da coordenada polar R = sqrt(x^2 + y^2 + z^2)
+	//Calculo da coordenada polar R = sqrt(x^2 + y^2 + z^2)
 	v[0] = sqrt(SQR(vect[0]) +  SQR(vect[1]) + SQR(vect[2]));
-	//calculo da coordenada polar theta = arctg(y/x)
+	//Calculo da coordenada polar theta = arctg(y/x)
 	v[1] = atan2(vect[1], vect[0]);
-	//calculo da coordenada polar fi = arccos(z/R)
+	//Calculo da coordenada polar phi = arccos(z/R)
 	v[2] = acos(vect[2]/v[0]);
 
 	return v;
 }
 
-//recebe a pressao embaixo do assento de todos os passageiros e retorna quantos estão sentados
+/*
+Recebe a pressao embaixo do assento de todos os passageiros e retorna quantos estão sentados
+*/
 vector<double> sum_thresh(vector<double> vect)
 {
 	//variavel para armazenar numero de passageiros
 	double pass = 0;
-	for(int i = 0; i < vect.size(); i++) if(vect[i] >= PERSON_WEIGHT_MIN) pass++;
+	for(int i=0; i<vect.size(); i++) if(vect[i] >= PERSON_WEIGHT_MIN) pass++;
 	
 	vector<double> v = vector<double>(1);
 	v[0] = pass;
 	return v;
 }
 
-//recebe a quantidade de combustivel no tanque (em kg), a quantidade de carga no deck (em kg) e o numero de passageiros que entraram no aviao
+/*
+Recebe a quantidade de combustivel no tanque, a quantidade de carga no deck
+e o numero de passageiros que entraram no aviao, e retorna a porcentagem da carga maxima do
+aviao
+*/
 vector<double> sum_perc(vector<double> vect)
 {
 	vector<double> v = vector<double>(1);
-	v[0] = (vect[0] + vect[1] + vect[2]*PERSON_WEIGHT_MED)/PLANE_MAX_WEIGHT;
+	v[0] = (vect[0] + vect[1] + (vect[2]*PERSON_WEIGHT_MED))/PLANE_MAX_WEIGHT;
 	return v;
 }
 
+/*
+sat_data
+{
+	{x1, y1, z1, d1},
+	{x2, y2, z2, d2},
+	{x3, y3, z3, d3},
+	{x4, y4, z4, d4}
+}
+
+gps_mat
+{
+	{A1, A2, A3},
+	{A4, A5, A6},
+	{A7, A8, A9},
+	{b1, b2, b3}
+
+	do sistema Ax = b, onde x=(Px, Py, Pz); P => a posicao que quero encontrar
+}
+
+*/
+
+/*
+Recebe os dados da matriz dos satelites, com a posicao dos 4 satelites
+e a distancia do ponto aos satelites, e gera uma matriz de um sistema linear
+de 3 equacoes cuja solucao e a posição do ponto. 
+*/
 double ** gps_matrix(double ** sat_data)
 {
 	size_t i, j;
-	double ** gps_mat = (double**) malloc(4*sizeof(double*));
-	for (i=0; i<4; i++) gps_mat[i] = (double*) malloc(3*sizeof(double));
+	double ** gps_mat = new double*[4];
+	for (i=0; i<4; i++) gps_mat[i] = new double[3];
 
 	for (i=0; i<3; i++) for (j=0; j<3; j++) gps_mat[i][j] = sat_data[0][j] - sat_data[i+1][j];
 
@@ -170,15 +231,18 @@ double ** gps_matrix(double ** sat_data)
 	return gps_mat;
 }
 
+/*
+Resolve um sistema linear por eliminacao gaussiana e retorna a solucao
+*/
 double * gauss_elim(double ** mat, double * res, size_t order)
 {
 	size_t i, j, k;
-	double ** aux_mat = (double**) malloc(order*sizeof(double*));
+	double ** aux_mat = new double*[order];
 	for (i=0; i<order; i++){
-		aux_mat[i] = (double*) malloc(order*sizeof(double));
+		aux_mat[i] = new double[order];
 		memcpy(aux_mat[i], mat[i], order*sizeof(mat));
 	}
-	double * aux_res = (double*) malloc(order*sizeof(double));
+	double * aux_res = new double[order];
 	memcpy(aux_res, res, order*sizeof(double));
 	
 	double coef;
@@ -192,7 +256,7 @@ double * gauss_elim(double ** mat, double * res, size_t order)
 	}
 
 	double sum;
-	double * sol = (double*) malloc(order*sizeof(double));
+	double * sol = new double[order];
 	for (i=order-1; i<order; i--){
 		sum = aux_res[i];
 		for (j=i+1; j<order; j++) sum-=sol[j]*aux_mat[i][j];
@@ -200,9 +264,9 @@ double * gauss_elim(double ** mat, double * res, size_t order)
 		sol[i] = sum/aux_mat[i][i];
 	}
 
-	for (i=0; i<order; i++) free(aux_mat[i]);
-	free(aux_mat);
-	free(aux_res);
+	for (i=0; i<order; i++) delete[] aux_mat[i];
+	delete[] aux_mat;
+	delete[] aux_res;
 	return sol;
 }
 
