@@ -3,9 +3,9 @@
 #Gustavo Cabral					9293028
 
 all:
-	g++ socketstream.cpp -o socketstream.o -c -std=c++11 -O3 -g
-	g++ socketstream.o physicalsensor.cpp -o physicalsensor.out -std=c++11 -O3 -g
-	g++ socketstream.o virtualsensor.cpp -o virtualsensor.out -lm -std=c++11 -O3 -g
+	g++ socketstream.cpp -o socketstream.o -c -std=c++11 -O3
+	g++ socketstream.o physicalsensor.cpp -o physicalsensor.out -std=c++11 -O3
+	g++ socketstream.o virtualsensor.cpp -o virtualsensor.out -lm -std=c++11 -O3
 	g++ datagenerator.cpp -o datagenerator.out -lm -std=c++11 -O3
 
 clean:

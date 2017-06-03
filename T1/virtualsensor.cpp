@@ -280,13 +280,14 @@ vector<double> local(vector<double> vect)
 	for (int i=0; i<4; i++) delete[] mat[i];
 	delete[] mat;
 	
-	double * p = gauss_elim(gps_mat, gps_mat[3], 3);
+	double * point = gauss_elim(gps_mat, gps_mat[3], 3);
 	vector<double> cart = vector<double>(3);
-	for(int i=0; i<3; i++) cart[i] = p[i];
+	for(int i=0; i<3; i++) cart[i] = point[i];
+	delete[] point;
 
-	for (int i=0; i<4; i++) free(gps_mat[i]);
-	free(gps_mat);
-	free(p);
+	for (int i=0; i<4; i++) delete[] gps_mat[i];
+	delete[] gps_mat;
+	//Transforma em polares para dar em graus N e graus E
 	return vect_trans(cart);
 }
 
@@ -332,8 +333,10 @@ int main(int argc, char * argv[])
 		cin>>op;
 		if (op>0 && op<=SENSOR_N){
 			cin>>samples;
+			//Pede que os sensores fisicos mandem os dados
 			vs[op-1].call_physen(samples);
 			for (int i=0; i<samples; i++){
+				//Le os dados
 				vs[op-1].receive_sample();
 				if (verbose){
 					cout<<"Dados: ";
@@ -360,15 +363,19 @@ int main(int argc, char * argv[])
 						break;
 
 				}
+
+				//Espera para sincronia com o tempo de leitura
 				usleep(1000000/OBS_PER_SEC);
 			}
 		}
 		else{
+			//Fecha os sensores fisicos
 			if (op==0) for (int i=0; i<SENSOR_N; i++) vs[i].call_physen(0);
 			else cout<<"Invalido"<<endl;
 		}
 	}
 
+	//Espera para que os sensores fisicos ja tenham fechado, antes de fechar o virtual
 	usleep(2000000);
 	for (int i=0; i<SENSOR_N; i++) vs[i].close_sensor();
 	delete[] vs;
